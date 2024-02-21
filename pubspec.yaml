@@ -1,0 +1,30 @@
+name: lean_requester
+description: "A new Flutter package project."
+version: 0.0.1
+homepage: https://plus.fluttercommunity.dev/
+repository: https://github.com/fluttercommunity/plus_plugins/tree/main/packages/connectivity_plus/connectivity_plus
+issue_tracker: https://github.com/fluttercommunity/plus_plugins/labels/connectivity_plus
+
+
+environment:
+  sdk: ">=3.1.0"
+  flutter: ">=3.16.1"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  dartz:
+  dio:
+  equatable:
+  connectivity_plus:
+  get_it:
+  awesome_dio_interceptor:
+  
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail:
+  flutter_lints:
+
+flutter:

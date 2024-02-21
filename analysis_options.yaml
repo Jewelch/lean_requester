@@ -1,0 +1,9 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    depend_on_referenced_packages: false
+    use_key_in_widget_constructors: false
+    curly_braces_in_flow_control_structures: false
+    library_private_types_in_public_api: false
+    use_string_in_part_of_directives: false

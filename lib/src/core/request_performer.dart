@@ -1,14 +1,15 @@
-import 'dart:async';
-
 import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart';
 
-import '../definitions/no_data_model.dart';
+import '../definitions/restful_methods.dart';
 import '../exports.dart';
+import '../ext/shared_ext.dart';
+import '../models/no_data_model.dart';
 
-part 'response_decoding.dart';
+part '../ext/private_ext.dart';
+part '_decoder.dart';
 
-abstract class RequestPerformer extends _RequestPerformer with _PerformerMixin {
-  const RequestPerformer(super.dio);
+abstract class LeanRequester extends _RequestPerformer with _PerformerMixin {
+  const LeanRequester(super.dio);
 }
 
 abstract class _RequestPerformer extends _BasePerformer implements _PerformerInterceptor {

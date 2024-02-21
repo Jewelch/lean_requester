@@ -6,9 +6,9 @@ export 'package:dio/dio.dart';
 export 'package:equatable/equatable.dart';
 export 'package:flutter/foundation.dart';
 
-export 'core/request_performer.dart';
-export 'definitions/data_objects.dart';
-export 'definitions/usecase.dart';
-export 'errors/exceptions.dart';
-export 'errors/failures.dart';
-export 'utils/networking_utilities.dart';
+export './connectivity/connectivity_monitor.dart';
+export './core/request_performer.dart';
+export './errors/exceptions.dart';
+export './errors/failures.dart';
+export './models/data_objects.dart';
+export 'definitions/use_case_defs.dart';

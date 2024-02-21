@@ -1,7 +1,7 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 
-abstract class ConnectivityMonitor {
+abstract interface class ConnectivityMonitor {
   bool get isConnected;
   startMonitoring();
 }

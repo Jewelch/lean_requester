@@ -1,6 +1,6 @@
 part of "request_performer.dart";
 
-extension RequestPerformerDecoder on _PerformerMixin {
+extension DecoderExt on _PerformerMixin {
   dynamic _decode<M extends DAO>(
     M decodableModel, {
     Response<dynamic>? response,

@@ -1,4 +1,4 @@
-part of '../core/request_performer.dart';
+part of '../core/requester.dart';
 
 extension _ListSecuredAdderExt<E> on List<E> {
   void ifNotNullAdd(E? element) {

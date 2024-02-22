@@ -7,4 +7,7 @@ final class NoDataModel with DAO {
 
   @override
   NoDataModel fromJson(dynamic json) => NoDataModel(success: json as bool);
+
+  @override
+  void toJson() {}
 }

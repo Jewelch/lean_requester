@@ -18,7 +18,6 @@ dependencies:
   dio:
   equatable:
   connectivity_plus:
-  get_it:
   awesome_dio_interceptor:
   
 dev_dependencies:

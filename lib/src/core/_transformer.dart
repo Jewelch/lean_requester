@@ -1,19 +1,29 @@
 part of "requester.dart";
 
-/// CodingGOAT [LeanTransformer] for [Dio].
+/// CodingGOAT [_LeanTransformer] for [Dio].
 ///
 /// [BackgroundTransformer] will do the deserialization of JSON in
 /// a background isolate if possible.
-class LeanTransformer<M extends DAO> extends SyncTransformer {
-  LeanTransformer({required this.dao, this.mockingData, this.mocking = false}) {
+class _LeanTransformer<M extends DAO> extends SyncTransformer {
+  final M dao;
+  final dynamic mockingData;
+  final bool mocking;
+  final int mockAwaitTime;
+
+  _LeanTransformer({
+    required this.dao,
+    this.mockingData,
+    this.mocking = false,
+    required this.mockAwaitTime,
+  }) {
     super.jsonDecodeCallback = (jsonString) => compute(jsonDecode, jsonString);
   }
 
-  M dao;
-  dynamic mockingData;
-  bool mocking = false;
-
-  M decodeMockingData() => dao.fromJson(mockingData);
+  Future<M> decodeMockingData() => Future.delayed(
+        Duration(milliseconds: mockAwaitTime),
+      ).then(
+        (_) => dao.fromJson(mockingData),
+      );
 
   @override
   Future<dynamic> transformResponse(
@@ -22,19 +32,19 @@ class LeanTransformer<M extends DAO> extends SyncTransformer {
   ) async {
     try {
       if (dao is NoDataModel) {
-        return dao.fromJson({
+        return dao.fromJson(
           mocking ? true : (responseBody.statusCode >= 200 && responseBody.statusCode < 300),
-        });
+        );
       }
 
       final decodedData = await super.transformResponse(options, responseBody);
 
       if (decodedData is! List && decodedData is! StringKeyedMap)
-        throw DecodingException('[$LeanTransformer => decode] Data should be either a List or a StringKeyedMap');
+        throw DecodingException('[$_LeanTransformer => decode] Data should be either a List or a StringKeyedMap');
 
       return dao.fromJson(decodedData);
     } catch (_, __) {
-      throw DecodingException('$LeanTransformer Error decoding data for ${dao.runtimeType}');
+      throw DecodingException('$_LeanTransformer Error decoding data for ${dao.runtimeType}');
     }
   }
 }

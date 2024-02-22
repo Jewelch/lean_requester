@@ -88,9 +88,14 @@ mixin _PerformerMixin on _RequestPerformer {
           ));
 
     //! Transofrmer setup
-    dio.transformer = LeanTransformer(dao: dao, mockingData: mockingData, mocking: mockIt);
+    dio.transformer = _LeanTransformer(
+      dao: dao,
+      mockingData: mockingData,
+      mocking: mockIt,
+      mockAwaitTime: mockAwaitDuraitonInMilliseconds,
+    );
 
-    if (mockingModeEnabled || mockIt) return (dio.transformer as LeanTransformer<M>).decodeMockingData();
+    if (mockingModeEnabled || mockIt) return (dio.transformer as _LeanTransformer<M>).decodeMockingData();
 
     return switch (method) {
       RestfullMethods.get => Future<M>.value((await dio.get(

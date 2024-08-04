@@ -1,6 +1,6 @@
 import 'data_objects.dart';
 
-final class NoDataModel with DAO {
+final class NoDataModel extends DAO {
   final bool? success;
 
   NoDataModel({this.success});
@@ -9,5 +9,5 @@ final class NoDataModel with DAO {
   NoDataModel fromJson(dynamic json) => NoDataModel(success: json as bool);
 
   @override
-  void toJson() {}
+  Map<String, dynamic> toJson() => {};
 }

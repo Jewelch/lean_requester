@@ -1,32 +1,41 @@
 import 'dart:async';
 
 import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart';
+import 'package:lean_requester/models_exp.dart';
 
 import '../definitions/restful_methods.dart';
 import '../exports.dart';
 import '../extensions/shared_ext.dart';
-import '../models/no_data_model.dart';
+import '../managers/cache_manager.dart';
 
 part '../extensions/private_ext.dart';
 part '_transformer.dart';
 
 abstract class LeanRequester extends _RequestPerformer with _PerformerMixin {
-  const LeanRequester(super.dio);
+  const LeanRequester(
+    super.dio,
+    super.cacheManager,
+  );
 }
 
-abstract class _RequestPerformer extends _BasePerformer implements _PerformerInterceptor {
-  const _RequestPerformer(super.dio);
+abstract interface class _RequestPerformer extends _BasePerformer implements _PerformerInterceptor {
+  const _RequestPerformer(
+    super.dio,
+    super.cacheManager,
+  );
 }
 
-interface class _BasePerformer {
+abstract interface class _BasePerformer {
   final Dio dio;
-  const _BasePerformer(this.dio);
+  final CacheManager cacheManager;
+
+  const _BasePerformer(
+    this.dio,
+    this.cacheManager,
+  );
 }
 
 abstract interface class _PerformerInterceptor {
-  //? Interceptor
-  QueuedInterceptorsWrapper? queuedInterceptorsWrapper;
-
   //! Base Options
   BaseOptions baseOptions = BaseOptions(
     connectTimeout: const Duration(milliseconds: 20000),
@@ -34,6 +43,9 @@ abstract interface class _PerformerInterceptor {
     receiveTimeout: const Duration(milliseconds: 20000),
     contentType: ContentType.json.mimeType,
   );
+
+  //? Interceptor
+  QueuedInterceptorsWrapper? queuedInterceptorsWrapper;
 
   //& Mocking Mode Preference
   bool mockingModeEnabled = false;
@@ -46,12 +58,17 @@ abstract interface class _PerformerInterceptor {
 }
 
 mixin _PerformerMixin on _RequestPerformer {
-  Future<M> performDecodingRequest<M extends DAO>({
+  /// #### Throws one of following exceptions
+  ///
+  /// `MockingDataDecodingException`,`DataDecodingException`,`DataDecodingException`,`ServerException`
+  Future<R> performDecodingRequest<R, M extends DAO>({
+    final bool deuggingEnabled = true,
+    final bool mockingEnabled = false,
     required M dao,
-    final bool debugIt = true,
-    final bool mockIt = false,
+    final bool asList = false,
+    String? listKey,
+    required String cachingKey,
     final dynamic mockingData,
-    final BaseOptions? baseOptions,
     required RestfullMethods method,
     required String path,
     String? baseUrl,
@@ -70,35 +87,36 @@ mixin _PerformerMixin on _RequestPerformer {
     String lengthHeader = Headers.contentLengthHeader,
     //* -------------------------------------------------------
   }) async {
-    dio.options = baseOptions ?? this.baseOptions;
-    dio.options.baseUrl = baseUrl ?? dio.options.baseUrl;
-    dio.options.contentType = contentType?.mimeType ?? ContentType.json.mimeType;
-    dio.options.headers.addExtraHeaders(extraHeaders);
+    if (!connectivityManager.isConnected) {
+      if (cacheManager.getString(cachingKey) != null) {
+        return asList
+            ? DaoList(item: dao, key: cachingKey).fromJson(jsonDecode(cacheManager.getString(cachingKey)!))
+            : dao.fromJson(jsonDecode(cacheManager.getString(cachingKey)!));
+      } else {
+        throw CacheException();
+      }
+    }
+
+    dio.options = setupOptions(baseOptions, baseUrl, contentType, extraHeaders);
 
     //! Interceptors setup
     dio.interceptors
       ..clear()
       ..ifNotNullAdd(queuedInterceptorsWrapper)
       ..addBasedOnCondition(
-          condition: debugIt,
+          condition: deuggingEnabled,
           AwesomeDioInterceptor(
             logRequestHeaders: logRequestHeaders,
             logResponseHeaders: logResponseHeaders,
             logRequestTimeout: logRequestTimeout,
           ));
 
-    //! Transofrmer setup
-    dio.transformer = _LeanTransformer(
-      dao: dao,
-      mockingData: mockingData,
-      mocking: mockIt,
-      mockAwaitTime: mockAwaitDuraitonInMilliseconds,
-    );
+    dio.transformer = _setupTransformer<R, M>(cachingKey, dao, asList, listKey, mockingEnabled, mockingData);
 
-    if (mockingModeEnabled || mockIt) return (dio.transformer as _LeanTransformer<M>).decodeMockingData();
+    if (mockingModeEnabled || mockingEnabled) return (dio.transformer as _LeanTransformer<R, M>).decodeMockingData();
 
     return switch (method) {
-      RestfullMethods.get => Future<M>.value((await dio.get(
+      RestfullMethods.get => Future<R>.value((await dio.get(
           path,
           queryParameters: queryParameters,
           options: options,
@@ -106,7 +124,7 @@ mixin _PerformerMixin on _RequestPerformer {
           onReceiveProgress: onReceiveProgress,
         ))
             .data),
-      RestfullMethods.post => Future<M>.value((await dio.post(
+      RestfullMethods.post => Future<R>.value((await dio.post(
           path,
           data: body,
           queryParameters: queryParameters,
@@ -116,7 +134,7 @@ mixin _PerformerMixin on _RequestPerformer {
           onReceiveProgress: onReceiveProgress,
         ))
             .data),
-      RestfullMethods.put => Future<M>.value((await dio.put(
+      RestfullMethods.put => Future<R>.value((await dio.put(
           path,
           data: body,
           queryParameters: queryParameters,
@@ -126,7 +144,7 @@ mixin _PerformerMixin on _RequestPerformer {
           onReceiveProgress: onReceiveProgress,
         ))
             .data),
-      RestfullMethods.patch => Future<M>.value((await dio.patch(
+      RestfullMethods.patch => Future<R>.value((await dio.patch(
           path,
           data: body,
           queryParameters: queryParameters,
@@ -136,7 +154,7 @@ mixin _PerformerMixin on _RequestPerformer {
           onReceiveProgress: onReceiveProgress,
         ))
             .data),
-      RestfullMethods.delete => Future<M>.value((await dio.delete(
+      RestfullMethods.delete => Future<R>.value((await dio.delete(
           path,
           data: body,
           queryParameters: queryParameters,
@@ -144,7 +162,7 @@ mixin _PerformerMixin on _RequestPerformer {
           cancelToken: cancelToken,
         ))
             .data),
-      RestfullMethods.download => Future<M>.value((await dio.download(
+      RestfullMethods.download => Future<R>.value((await dio.download(
           path,
           savePath,
           onReceiveProgress: onReceiveProgress,
@@ -157,5 +175,60 @@ mixin _PerformerMixin on _RequestPerformer {
         ))
             .data),
     };
+  }
+
+  //! Options setup
+  BaseOptions setupOptions(
+    BaseOptions? baseOptions,
+    String? baseUrl,
+    ContentType? contentType,
+    StringKeyedMap? extraHeaders,
+  ) {
+    var options = baseOptions ?? BaseOptions();
+    options
+      ..baseUrl = baseUrl ?? options.baseUrl
+      ..contentType = contentType?.mimeType ?? ContentType.json.mimeType
+      ..headers.addExtraHeaders(extraHeaders);
+
+    return options;
+  }
+
+  //! Interceptors setup
+  Interceptors setupInterceptors(
+    bool debugIt,
+  ) {
+    final interceptors = Interceptors();
+
+    return interceptors
+      ..clear()
+      ..ifNotNullAdd(queuedInterceptorsWrapper)
+      ..addBasedOnCondition(
+          condition: debugIt && kDebugMode,
+          AwesomeDioInterceptor(
+            logRequestHeaders: logRequestHeaders,
+            logResponseHeaders: logResponseHeaders,
+            logRequestTimeout: logRequestTimeout,
+          ));
+  }
+
+  //! Transofrmer setup
+  _LeanTransformer<R, M> _setupTransformer<R, M extends DAO>(
+    String cachingKey,
+    M dao,
+    bool asList,
+    String? listKey,
+    bool mockingEnabled,
+    dynamic mockingData,
+  ) {
+    return _LeanTransformer<R, M>(
+      cacheManager,
+      cachingKey,
+      dao,
+      asList,
+      listKey,
+      mockingData,
+      mockingEnabled,
+      mockAwaitDuraitonInMilliseconds,
+    );
   }
 }

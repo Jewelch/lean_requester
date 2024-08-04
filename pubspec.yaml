@@ -17,9 +17,10 @@ dependencies:
   dartz:
   dio:
   equatable:
-  connectivity_plus:
+  connectivity_plus: ^6.0.4
   awesome_dio_interceptor:
-  
+  shared_preferences: 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

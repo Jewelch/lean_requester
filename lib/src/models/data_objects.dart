@@ -6,7 +6,7 @@ abstract class DTO extends Equatable {
 }
 
 // Data Access Object
-base mixin DAO<T> {
+abstract class DAO<T> {
   T fromJson(dynamic json);
-  void toJson();
+  Map<String, dynamic> toJson();
 }

@@ -1,18 +1,18 @@
 import 'data_objects.dart';
 
-final class DaoList<M extends DAO> with DAO {
+final class DaoList<M extends DAO> extends DAO {
   final M? item;
-  final String key;
-  final List<M>? list;
+  final String? key;
+  List<M>? list;
 
-  DaoList({this.list, this.item, required this.key});
-
-  @override
-  DaoList fromJson(json) => DaoList(
-        list: (json[key] as List<dynamic>).map<M>((e) => item?.fromJson(e)).toList() as List<DAO>,
-        key: '',
-      );
+  DaoList({this.list, this.item, this.key});
 
   @override
-  Map toJson() => {key: list};
+  DaoList<M> fromJson(json) =>
+      DaoList<M>(list: ((key == null ? json : json[key]) as List).map<M>((e) => item?.fromJson(e)).toList());
+
+  @override
+  Map<String, dynamic> toJson() => {
+        if (key != null) key!: list?.map((M e) => e.toJson()).toList(),
+      };
 }

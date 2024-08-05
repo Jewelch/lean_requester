@@ -1,20 +1,24 @@
 import 'dart:async';
 
 import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart';
+import 'package:cg_core_defs/cache/cache_manager.dart';
+import 'package:cg_core_defs/connectivity/connectivity_monitor.dart';
 import 'package:lean_requester/models_exp.dart';
 
 import '../definitions/restful_methods.dart';
 import '../exports.dart';
 import '../extensions/shared_ext.dart';
-import '../managers/cache_manager.dart';
 
 part '../extensions/private_ext.dart';
 part '_transformer.dart';
 
 abstract class LeanRequester extends _RequestPerformer with _PerformerMixin {
+  static final Map<String, dynamic> headers = {};
+
   const LeanRequester(
     super.dio,
     super.cacheManager,
+    super.connectivityMonitor,
   );
 }
 
@@ -22,16 +26,19 @@ abstract interface class _RequestPerformer extends _BasePerformer implements _Pe
   const _RequestPerformer(
     super.dio,
     super.cacheManager,
+    super.connectivityMonitor,
   );
 }
 
 abstract interface class _BasePerformer {
   final Dio dio;
   final CacheManager cacheManager;
+  final ConnectivityMonitor connectivityMonitor;
 
   const _BasePerformer(
     this.dio,
     this.cacheManager,
+    this.connectivityMonitor,
   );
 }
 
@@ -80,26 +87,16 @@ mixin _PerformerMixin on _RequestPerformer {
     final CancelToken? cancelToken,
     final ProgressCallback? onSendProgress,
     final ProgressCallback? onReceiveProgress,
-
     //* ------------------  Download Request ------------------
     dynamic savePath,
     bool deleteOnError = true,
     String lengthHeader = Headers.contentLengthHeader,
     //* -------------------------------------------------------
   }) async {
-    if (!connectivityManager.isConnected) {
-      if (cacheManager.getString(cachingKey) != null) {
-        return asList
-            ? DaoList(item: dao, key: cachingKey).fromJson(jsonDecode(cacheManager.getString(cachingKey)!))
-            : dao.fromJson(jsonDecode(cacheManager.getString(cachingKey)!));
-      } else {
-        throw CacheException();
-      }
-    }
+    //= No Connectivity handling
+    if (!connectivityMonitor.isConnected) return _restoreCachedData(cachingKey, dao, asList);
 
-    dio.options = setupOptions(baseOptions, baseUrl, contentType, extraHeaders);
-
-    //! Interceptors setup
+    //@ Interceptors setup
     dio.interceptors
       ..clear()
       ..ifNotNullAdd(queuedInterceptorsWrapper)
@@ -111,10 +108,21 @@ mixin _PerformerMixin on _RequestPerformer {
             logRequestTimeout: logRequestTimeout,
           ));
 
-    dio.transformer = _setupTransformer<R, M>(cachingKey, dao, asList, listKey, mockingEnabled, mockingData);
+    dio
+      //* Options setup
+      ..options = setupOptions(
+        baseOptions,
+        baseUrl,
+        contentType,
+        LeanRequester.headers..addIfAvailable(extraHeaders),
+      )
+      //! Transofrmer setup
+      ..transformer = _setupTransformer<R, M>(cachingKey, dao, asList, listKey, mockingEnabled, mockingData);
 
+    //$ Mocking Enabled handling
     if (mockingModeEnabled || mockingEnabled) return (dio.transformer as _LeanTransformer<R, M>).decodeMockingData();
 
+    //* Real Calls handling
     return switch (method) {
       RestfullMethods.get => Future<R>.value((await dio.get(
           path,
@@ -177,7 +185,20 @@ mixin _PerformerMixin on _RequestPerformer {
     };
   }
 
-  //! Options setup
+  R _restoreCachedData<R, M extends DAO>(
+    String cachingKey,
+    M dao,
+    bool asList,
+  ) {
+    final cachedDataSting = cacheManager.getString(cachingKey);
+
+    if (cachedDataSting != null) {
+      return (asList ? DaoList(item: dao, key: cachingKey) : dao).fromJson(jsonDecode(cachedDataSting));
+    } else {
+      throw CacheException();
+    }
+  }
+
   BaseOptions setupOptions(
     BaseOptions? baseOptions,
     String? baseUrl,
@@ -193,25 +214,6 @@ mixin _PerformerMixin on _RequestPerformer {
     return options;
   }
 
-  //! Interceptors setup
-  Interceptors setupInterceptors(
-    bool debugIt,
-  ) {
-    final interceptors = Interceptors();
-
-    return interceptors
-      ..clear()
-      ..ifNotNullAdd(queuedInterceptorsWrapper)
-      ..addBasedOnCondition(
-          condition: debugIt && kDebugMode,
-          AwesomeDioInterceptor(
-            logRequestHeaders: logRequestHeaders,
-            logResponseHeaders: logResponseHeaders,
-            logRequestTimeout: logRequestTimeout,
-          ));
-  }
-
-  //! Transofrmer setup
   _LeanTransformer<R, M> _setupTransformer<R, M extends DAO>(
     String cachingKey,
     M dao,
@@ -219,16 +221,7 @@ mixin _PerformerMixin on _RequestPerformer {
     String? listKey,
     bool mockingEnabled,
     dynamic mockingData,
-  ) {
-    return _LeanTransformer<R, M>(
-      cacheManager,
-      cachingKey,
-      dao,
-      asList,
-      listKey,
-      mockingData,
-      mockingEnabled,
-      mockAwaitDuraitonInMilliseconds,
-    );
-  }
+  ) =>
+      _LeanTransformer<R, M>(
+          cacheManager, cachingKey, dao, asList, listKey, mockingData, mockingEnabled, mockAwaitDuraitonInMilliseconds);
 }

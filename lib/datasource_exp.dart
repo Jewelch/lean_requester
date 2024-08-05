@@ -1,8 +1,6 @@
 export 'dart:convert' show jsonEncode, jsonDecode;
 export 'dart:io' show ContentType;
 
-export 'package:dartz/dartz.dart' hide State;
-
 export './src/core/requester.dart';
 export './src/definitions/datasource_defs.dart';
 export './src/definitions/restful_methods.dart';

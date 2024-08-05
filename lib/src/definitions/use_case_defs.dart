@@ -1,7 +1,7 @@
-import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 
 import '../errors/index.dart';
+import '../models/either.dart';
 
 export 'package:dio/dio.dart';
 export 'package:equatable/equatable.dart';

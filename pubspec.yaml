@@ -4,7 +4,7 @@ version: 0.0.1
 homepage: https://plus.fluttercommunity.dev/
 repository: https://github.com/fluttercommunity/plus_plugins/tree/main/packages/connectivity_plus/connectivity_plus
 issue_tracker: https://github.com/fluttercommunity/plus_plugins/labels/connectivity_plus
-
+publish_to: none
 
 environment:
   sdk: ">=3.1.0"
@@ -14,10 +14,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  dartz:
+  cg_core_defs:
+    path: ../cg_core_defs
+
   dio:
   equatable:
-  connectivity_plus: ^6.0.4
   awesome_dio_interceptor:
   shared_preferences: 
 

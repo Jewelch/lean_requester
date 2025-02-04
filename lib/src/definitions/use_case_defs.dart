@@ -6,10 +6,10 @@ import '../models/either.dart';
 export 'package:dio/dio.dart';
 export 'package:equatable/equatable.dart';
 
-typedef UsecaseResult<T> = Future<Either<Failure, T>>;
+typedef UseCaseResult<T> = Future<Either<Failure, T>>;
 
 abstract interface class UseCase<T, P> {
-  UsecaseResult<T> call(P params);
+  UseCaseResult<T> call(P params);
 }
 
 final class NoParams extends Equatable {

@@ -1,10 +1,20 @@
 part of "requester.dart";
 
+abstract class FullSyncTransformer<R> extends SyncTransformer {
+  FullSyncTransformer() : super(jsonDecodeCallback: (jsonString) => compute(jsonDecode, jsonString));
+
+  void responseAssertion(int statusCode);
+  void dataAssertion(dynamic data);
+
+  Future<R> transformCachedData(String cachedData);
+  Future<R> transformMockResponse();
+}
+
 /// CodingGOAT [_LeanTransformer] for [Dio].
 ///
 /// [BackgroundTransformer] will do the deserialization of JSON in
 /// a background isolate if possible.
-class _LeanTransformer<R, M extends DAO> extends SyncTransformer {
+final class _LeanTransformer<R, M extends DAO> extends FullSyncTransformer {
   final CacheManager cacheManager;
   final String cachingKey;
   final M dao;
@@ -23,11 +33,24 @@ class _LeanTransformer<R, M extends DAO> extends SyncTransformer {
     this.mockingData,
     this.mocking,
     this.mockAwaitTime,
-  ) {
-    super.jsonDecodeCallback = (jsonString) => compute(jsonDecode, jsonString);
+  );
+
+  @override
+  Future transformCachedData(String cachedData) async {
+    final cachedDataString = cacheManager.getString(cachingKey);
+    if (cachedDataString == null) throw CacheException();
+    try {
+      return await compute(
+        (String data) => (asList ? DaoList(item: dao, key: cachingKey) : dao).fromJson(jsonDecode(data)),
+        cachedDataString,
+      );
+    } catch (e, s) {
+      throw MockingDataDecodingException(e, s);
+    }
   }
 
-  Future<R> decodeMockingData() async {
+  @override
+  Future<R> transformMockResponse() async {
     await Future.delayed(Duration(milliseconds: mockAwaitTime));
 
     dataAssertion(mockingData);
@@ -54,13 +77,15 @@ class _LeanTransformer<R, M extends DAO> extends SyncTransformer {
     RequestOptions options,
     ResponseBody responseBody,
   ) async {
+    responseAssertion(responseBody.statusCode);
+
     final decodedData = await super.transformResponse(options, responseBody);
 
     dataAssertion(decodedData);
 
     try {
       if (dao is NoDataModel) {
-        return dao.fromJson(responseBody.statusCode >= 200 && responseBody.statusCode < 300);
+        return dao.fromJson([responseBody.statusCode >= 200 && responseBody.statusCode < 300]);
       }
 
       if (asList) {
@@ -83,11 +108,17 @@ class _LeanTransformer<R, M extends DAO> extends SyncTransformer {
     }
   }
 
-  void dataAssertion(data) {
+  @override
+  void responseAssertion(int statusCode) {
+    if (statusCode < 200 || statusCode > 299) throw UnvalidResponseStatusCode(statusCode);
+  }
+
+  @override
+  void dataAssertion(dynamic data) {
     if (data is! List && data is! StringKeyedMap) throw UnsupportedDataTypeException();
 
     if (data is List && listKey != null) throw UnawaitedListKeyException(listKey);
 
-    if (data is StringKeyedMap && listKey == null) throw MissingListKeyException();
+    if (data is StringKeyedMap && asList && listKey == null) throw MissingListKeyException();
   }
 }

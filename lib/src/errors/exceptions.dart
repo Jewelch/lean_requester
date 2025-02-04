@@ -6,6 +6,12 @@ class UnsupportedDataTypeException implements Exception {
   }
 }
 
+class UnvalidResponseStatusCode implements Exception {
+  UnvalidResponseStatusCode(int statusCode) {
+    Debugger.red('Invalid response status code encountered ($statusCode)');
+  }
+}
+
 final class DataDecodingException<M> implements Exception {
   DataDecodingException(dynamic exception, StackTrace stacktrace) {
     Debugger.red("$M $exception\n$stacktrace");
@@ -14,7 +20,8 @@ final class DataDecodingException<M> implements Exception {
 
 final class MissingListKeyException implements Exception {
   MissingListKeyException() {
-    Debugger.red("Received response is a Map, you have not specified a `listKey` though, you should be trying to anger me.");
+    Debugger.red(
+        "Received response is a Map, you have not specified a `listKey` though, you should be trying to anger me.");
   }
 }
 
@@ -31,6 +38,12 @@ final class MockingDataDecodingException<M> implements Exception {
   }
 }
 
-final class ServerException implements Exception {}
+class ServerException implements Exception {
+  final String? message;
+
+  ServerException([this.message]) {
+    Debugger.red(message);
+  }
+}
 
 final class CacheException implements Exception {}

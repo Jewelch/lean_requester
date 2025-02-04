@@ -1,4 +1,4 @@
-library lean_requester;
+library;
 
 export './datasource_exp.dart';
 export './lean_interceptor.dart';

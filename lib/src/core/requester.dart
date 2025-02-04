@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' show Random, min;
 
 import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart';
 import 'package:cg_core_defs/cache/cache_manager.dart';
@@ -57,8 +58,11 @@ abstract interface class _PerformerInterceptor {
   //& Mocking Mode Preference
   bool mockingModeEnabled = false;
   int mockAwaitDuraitonInMilliseconds = 600;
+  int retryDelayInMilliseconds = 1000;
+  int maxRetryDelayInMilliseconds = 10000;
 
   //$ Awesome Dio Interceptor Setup
+  bool debuggingEnabled = false;
   bool logRequestHeaders = false;
   bool logResponseHeaders = false;
   bool logRequestTimeout = false;
@@ -67,9 +71,9 @@ abstract interface class _PerformerInterceptor {
 mixin _PerformerMixin on _RequestPerformer {
   /// #### Throws one of following exceptions
   ///
-  /// `MockingDataDecodingException`,`DataDecodingException`,`DataDecodingException`,`ServerException`
-  Future<R> performDecodingRequest<R, M extends DAO>({
-    final bool deuggingEnabled = true,
+  /// `MockingDataDecodingException`,`DataDecodingException`,`ServerException`
+  Future<R> request<R, M extends DAO>({
+    final bool debuggingRequest = true,
     final bool mockingEnabled = false,
     required M dao,
     final bool asList = false,
@@ -87,119 +91,87 @@ mixin _PerformerMixin on _RequestPerformer {
     final CancelToken? cancelToken,
     final ProgressCallback? onSendProgress,
     final ProgressCallback? onReceiveProgress,
+    int retryCount = 3,
+
     //* ------------------  Download Request ------------------
     dynamic savePath,
     bool deleteOnError = true,
     String lengthHeader = Headers.contentLengthHeader,
     //* -------------------------------------------------------
   }) async {
-    //= No Connectivity handling
-    if (!connectivityMonitor.isConnected) return _restoreCachedData(cachingKey, dao, asList);
+    //* Options setup
+    dio.options = _setupOptions(
+      baseOptions,
+      baseUrl,
+      contentType,
+      LeanRequester.headers..addIfAvailable(extraHeaders),
+    );
 
     //@ Interceptors setup
     dio.interceptors
       ..clear()
       ..ifNotNullAdd(queuedInterceptorsWrapper)
       ..addBasedOnCondition(
-          condition: deuggingEnabled,
+          condition: debuggingRequest && debuggingEnabled,
           AwesomeDioInterceptor(
             logRequestHeaders: logRequestHeaders,
             logResponseHeaders: logResponseHeaders,
             logRequestTimeout: logRequestTimeout,
           ));
 
-    dio
-      //* Options setup
-      ..options = setupOptions(
-        baseOptions,
-        baseUrl,
-        contentType,
-        LeanRequester.headers..addIfAvailable(extraHeaders),
-      )
-      //! Transofrmer setup
-      ..transformer = _setupTransformer<R, M>(cachingKey, dao, asList, listKey, mockingEnabled, mockingData);
+    //! Transofrmer setup
+    dio.transformer =
+        _setupTransformer<R, M>(cachingKey, dao, asList, listKey, mockingEnabled, mockingData);
 
-    //$ Mocking Enabled handling
-    if (mockingModeEnabled || mockingEnabled) return (dio.transformer as _LeanTransformer<R, M>).decodeMockingData();
+    final dioTransformer = dio.transformer as _LeanTransformer<R, M>;
+
+    //= No Connectivity
+    if (!connectivityMonitor.isConnected) {
+      return await dioTransformer.transformCachedData(cachingKey);
+    }
+
+    //$ Mocking Enabled
+    if (mockingModeEnabled || mockingEnabled) {
+      return await dioTransformer.transformMockResponse();
+    }
 
     //* Real Calls handling
-    return switch (method) {
-      RestfullMethods.get => Future<R>.value((await dio.get(
-          path,
-          queryParameters: queryParameters,
-          options: options,
-          cancelToken: cancelToken,
-          onReceiveProgress: onReceiveProgress,
-        ))
-            .data),
-      RestfullMethods.post => Future<R>.value((await dio.post(
-          path,
-          data: body,
-          queryParameters: queryParameters,
-          options: options,
-          cancelToken: cancelToken,
-          onSendProgress: onSendProgress,
-          onReceiveProgress: onReceiveProgress,
-        ))
-            .data),
-      RestfullMethods.put => Future<R>.value((await dio.put(
-          path,
-          data: body,
-          queryParameters: queryParameters,
-          options: options,
-          cancelToken: cancelToken,
-          onSendProgress: onSendProgress,
-          onReceiveProgress: onReceiveProgress,
-        ))
-            .data),
-      RestfullMethods.patch => Future<R>.value((await dio.patch(
-          path,
-          data: body,
-          queryParameters: queryParameters,
-          options: options,
-          cancelToken: cancelToken,
-          onSendProgress: onSendProgress,
-          onReceiveProgress: onReceiveProgress,
-        ))
-            .data),
-      RestfullMethods.delete => Future<R>.value((await dio.delete(
-          path,
-          data: body,
-          queryParameters: queryParameters,
-          options: options,
-          cancelToken: cancelToken,
-        ))
-            .data),
-      RestfullMethods.download => Future<R>.value((await dio.download(
-          path,
-          savePath,
-          onReceiveProgress: onReceiveProgress,
-          data: body,
-          queryParameters: queryParameters,
-          deleteOnError: deleteOnError,
-          lengthHeader: lengthHeader,
-          options: options,
-          cancelToken: cancelToken,
-        ))
-            .data),
-    };
-  }
 
-  R _restoreCachedData<R, M extends DAO>(
-    String cachingKey,
-    M dao,
-    bool asList,
-  ) {
-    final cachedDataSting = cacheManager.getString(cachingKey);
+    for (int i = 0; i < retryCount; i++) {
+      try {
+        return (await dio.request(path,
+                data: body,
+                queryParameters: queryParameters,
+                cancelToken: cancelToken,
+                options: DioMixin.checkOptions(method.name, options),
+                onSendProgress: onSendProgress,
+                onReceiveProgress: onReceiveProgress))
+            .data;
+      } catch (_) {
+        if (i == retryCount - 1)
+          throw ServerException(
+            'Request to $path failed after $retryCount retries with method $method and body $body',
+          );
 
-    if (cachedDataSting != null) {
-      return (asList ? DaoList(item: dao, key: cachingKey) : dao).fromJson(jsonDecode(cachedDataSting));
-    } else {
-      throw CacheException();
+        /// Delays the execution for a duration calculated based on an exponential backoff strategy.
+        ///
+        /// The delay duration is calculated as follows:
+        /// - The base duration is `(1 << i) * 1000` milliseconds, where `i` is an integer representing the current retry attempt.
+        /// - A random value between 0 and 1000 milliseconds is added to the base duration to introduce jitter.
+        /// - The total duration is capped at a maximum of 10 seconds.
+        ///
+        /// This approach helps to avoid overwhelming the server with repeated requests in case of failures.
+        await Future.delayed(
+          Duration(
+              milliseconds: min((1 << i) * retryDelayInMilliseconds + Random().nextInt(1000),
+                  maxRetryDelayInMilliseconds)),
+        );
+      }
     }
+    throw ServerException('Unexpected error occurred while processing the request to $path.');
   }
 
-  BaseOptions setupOptions(
+  BaseOptions _setupOptions(
     BaseOptions? baseOptions,
     String? baseUrl,
     ContentType? contentType,
@@ -223,5 +195,13 @@ mixin _PerformerMixin on _RequestPerformer {
     dynamic mockingData,
   ) =>
       _LeanTransformer<R, M>(
-          cacheManager, cachingKey, dao, asList, listKey, mockingData, mockingEnabled, mockAwaitDuraitonInMilliseconds);
+        cacheManager,
+        cachingKey,
+        dao,
+        asList,
+        listKey,
+        mockingData,
+        mockingEnabled,
+        mockAwaitDuraitonInMilliseconds,
+      );
 }

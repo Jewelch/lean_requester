@@ -92,11 +92,9 @@ final class _LeanTransformer<R, M extends DAO> extends FullSyncTransformer {
         final daoList = DaoList<M>(key: listKey, item: dao);
         daoList.list = DaoList<M>(key: listKey, item: (dao)).fromJson(decodedData).list as List<M>;
         await cacheManager.setString(
-            cachingKey,
-            jsonEncode(
-              DaoList<M>(item: dao, key: cachingKey, list: daoList.list).toJson(),
-            ));
-
+          cachingKey,
+          jsonEncode(DaoList<M>(item: dao, key: cachingKey, list: daoList.list).toJson()),
+        );
         return daoList as R;
       }
 
@@ -115,10 +113,16 @@ final class _LeanTransformer<R, M extends DAO> extends FullSyncTransformer {
 
   @override
   void dataAssertion(dynamic data) {
-    if (data is! List && data is! StringKeyedMap) throw UnsupportedDataTypeException();
+    if (data is! List && data is! StringKeyedMap) {
+      throw UnsupportedDataTypeException();
+    }
 
-    if (data is List && listKey != null) throw UnawaitedListKeyException(listKey);
+    if (data is List && listKey != null) {
+      throw UnawaitedListKeyException(listKey);
+    }
 
-    if (data is StringKeyedMap && asList && listKey == null) throw MissingListKeyException();
+    if (data is StringKeyedMap && asList && listKey == null) {
+      throw MissingListKeyException();
+    }
   }
 }

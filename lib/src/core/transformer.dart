@@ -1,7 +1,14 @@
 part of "requester.dart";
 
 abstract class FullSyncTransformer<R> extends SyncTransformer {
-  FullSyncTransformer() : super(jsonDecodeCallback: (jsonString) => compute(jsonDecode, jsonString));
+  FullSyncTransformer()
+      : super(jsonDecodeCallback: (jsonString) {
+          if (jsonString.length < 1000) {
+            return jsonDecode(jsonString);
+          } else {
+            return compute(jsonDecode, jsonString);
+          }
+        });
 
   void responseAssertion(int statusCode);
   void dataAssertion(dynamic data);
@@ -36,39 +43,28 @@ final class _LeanTransformer<R, M extends DAO> extends FullSyncTransformer {
   );
 
   @override
-  Future transformCachedData(String cachedData) async {
+  Future<R> transformCachedData(String cachedData) async {
     final cachedDataString = cacheManager.getString(cachingKey);
-    if (cachedDataString == null) throw CacheException();
+    if (cachedDataString == null) throw NonExistingCacheDataException(cachingKey);
     try {
-      return await compute(
-        (String data) => (asList ? DaoList(item: dao, key: cachingKey) : dao).fromJson(jsonDecode(data)),
-        cachedDataString,
-      );
-    } catch (e, s) {
-      throw MockingDataDecodingException(e, s);
+      return await _deserializeData(jsonDecode(cachedDataString));
+    } catch (exception, stacktrace) {
+      throw DataDecodingException<M>.cache(exception, stacktrace);
     }
   }
 
   @override
   Future<R> transformMockResponse() async {
     await Future.delayed(Duration(milliseconds: mockAwaitTime));
-
     dataAssertion(mockingData);
 
     try {
       if (dao is NoDataModel) {
         return dao.fromJson(true);
       }
-
-      if (asList) {
-        final daoList = DaoList<M>(key: listKey, item: dao);
-        daoList.list = DaoList<M>(key: listKey, item: (dao)).fromJson(mockingData).list as List<M>;
-        return daoList as R;
-      }
-
-      return dao.fromJson(mockingData);
+      return await _deserializeData(mockingData);
     } catch (exception, stacktrace) {
-      throw DataDecodingException<M>(exception, stacktrace);
+      throw DataDecodingException<M>.mock(exception, stacktrace);
     }
   }
 
@@ -78,37 +74,56 @@ final class _LeanTransformer<R, M extends DAO> extends FullSyncTransformer {
     ResponseBody responseBody,
   ) async {
     responseAssertion(responseBody.statusCode);
-
     final decodedData = await super.transformResponse(options, responseBody);
-
     dataAssertion(decodedData);
 
     try {
       if (dao is NoDataModel) {
-        return dao.fromJson([responseBody.statusCode >= 200 && responseBody.statusCode < 300]);
+        return dao.fromJson(responseBody.statusCode >= 200 && responseBody.statusCode < 300);
       }
 
-      if (asList) {
-        final daoList = DaoList<M>(key: listKey, item: dao);
-        daoList.list = DaoList<M>(key: listKey, item: (dao)).fromJson(decodedData).list as List<M>;
-        await cacheManager.setString(
-          cachingKey,
-          jsonEncode(DaoList<M>(item: dao, key: cachingKey, list: daoList.list).toJson()),
-        );
-        return daoList as R;
-      }
-
-      final M result = dao.fromJson(decodedData);
-      await cacheManager.setString(cachingKey, jsonEncode(result.toJson()));
-      return result as R;
+      final R data = await _deserializeData(decodedData);
+      await _cacheData(data);
+      return data;
     } catch (exception, stacktrace) {
-      throw DataDecodingException<M>(exception, stacktrace);
+      throw DataDecodingException<M>.network(exception, stacktrace);
+    }
+  }
+
+  Future<R> _deserializeData(dynamic data) async {
+    if (asList) {
+      if (data is StringKeyedMap && listKey != null && !data.containsKey(listKey)) {
+        throw ListKeyException.notExisting(listKey);
+      }
+      return await compute(
+        (input) {
+          final daoList = DaoList<M>(key: listKey, item: dao);
+          return daoList.fromJson(input) as R;
+        },
+        data,
+      );
+    } else {
+      return await compute(
+        (input) => dao.fromJson(input) as R,
+        data,
+      );
+    }
+  }
+
+  Future<void> _cacheData(R data) async {
+    if (asList && data is DaoList<M>) {
+      await cacheManager.setString(
+        cachingKey,
+        jsonEncode(DaoList<M>(item: dao, key: listKey, list: data.list).toJson()),
+      );
+    } else if (data is M) {
+      await cacheManager.setString(cachingKey, jsonEncode(data.toJson()));
     }
   }
 
   @override
   void responseAssertion(int statusCode) {
-    if (statusCode < 200 || statusCode > 299) throw UnvalidResponseStatusCode(statusCode);
+    if (statusCode < 200 || statusCode > 299) throw InvalidResponseStatusCode(statusCode);
   }
 
   @override
@@ -118,11 +133,11 @@ final class _LeanTransformer<R, M extends DAO> extends FullSyncTransformer {
     }
 
     if (data is List && listKey != null) {
-      throw UnawaitedListKeyException(listKey);
+      throw ListKeyException.unexpected(listKey);
     }
 
     if (data is StringKeyedMap && asList && listKey == null) {
-      throw MissingListKeyException();
+      throw ListKeyException.notProvided();
     }
   }
 }

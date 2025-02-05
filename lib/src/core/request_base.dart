@@ -23,6 +23,7 @@ abstract class LeanRequesterBase {
   QueuedInterceptorsWrapper? get queuedInterceptorsWrapper => null;
 
   bool get mockingModeEnabled => false;
+  int get maxRetriesPerRequest => 3;
   int get mockAwaitDurationMs => 500;
   int get retryDelayMs => 2000;
   int get maxRetryDelayMs => 10000;

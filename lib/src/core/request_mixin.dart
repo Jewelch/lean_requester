@@ -9,7 +9,7 @@ mixin LeanRequesterMixin on LeanRequesterBase {
     String? listKey,
     required String cachingKey,
     dynamic mockingData,
-    required RestfullMethods method,
+    required RestfulMethods method,
     required String path,
     String? baseUrl,
     dynamic body,
@@ -20,19 +20,9 @@ mixin LeanRequesterMixin on LeanRequesterBase {
     CancelToken? cancelToken,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
-    int retryCount = 3,
-    dynamic savePath,
-    bool deleteOnError = true,
-    String lengthHeader = Headers.contentLengthHeader,
   }) async {
     dio
-      ..setupOptions(
-        baseOptions,
-        baseUrl,
-        contentType,
-        headers,
-        extraHeaders,
-      )
+      ..setupOptions(baseOptions, baseUrl, contentType, headers, extraHeaders)
       ..setupInterceptors(
         queuedInterceptorsWrapper,
         debugRequest,
@@ -62,8 +52,31 @@ mixin LeanRequesterMixin on LeanRequesterBase {
       return await transformer.transformMockResponse();
     }
 
-    for (int attempt = 0; attempt < retryCount; attempt++) {
-      Debugger.red('Attempt $attempt for request to $path');
+    return await _attemptRequest(
+      path: path,
+      body: body,
+      queryParameters: queryParameters,
+      method: method,
+      options: options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
+
+  Future<R> _attemptRequest<R>({
+    required String path,
+    dynamic body,
+    StringKeyedMap? queryParameters,
+    required RestfulMethods method,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    for (int attempt = 0; attempt < maxRetriesPerRequest; attempt++) {
+      if (attempt > 0)
+        Debugger.red('Attempt ${attempt + 1} for request to ${baseOptions.baseUrl + path}');
 
       try {
         final response = await dio.request(
@@ -77,9 +90,9 @@ mixin LeanRequesterMixin on LeanRequesterBase {
         );
         return response.data;
       } catch (e) {
-        if (attempt == retryCount - 1)
+        if (attempt == maxRetriesPerRequest - 1)
           throw ServerException(
-            'Request to $path failed after $retryCount retries',
+            'Request to ${baseOptions.baseUrl + path} failed after $maxRetriesPerRequest retries',
           );
 
         await Future.delayed(
@@ -92,6 +105,11 @@ mixin LeanRequesterMixin on LeanRequesterBase {
         );
       }
     }
-    throw ServerException('Unexpected error occurred while processing the request to $path.');
+    throw ServerException(
+      'Unexpected error occurred while processing the request to $path.\n'
+      'Method: ${method.name}\n'
+      'Query Parameters: ${queryParameters?.toString() ?? 'None'}\n'
+      'Body: ${body?.toString() ?? 'None'}',
+    );
   }
 }

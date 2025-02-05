@@ -1,12 +1,11 @@
-enum RestfullMethods {
+enum RestfulMethods {
   get("GET"),
   post("POST"),
   put("PUT"),
   delete("DELETE"),
-  patch("PATCH"),
-  download("DOWNLOAD");
+  patch("PATCH");
 
   final String name;
 
-  const RestfullMethods(this.name);
+  const RestfulMethods(this.name);
 }

@@ -12,10 +12,9 @@ import '../exports.dart';
 import '../extensions/shared_ext.dart';
 
 part '../extensions/private_ext.dart';
-part './dio_extensions.dart';
 part './request_base.dart';
 part './request_mixin.dart';
-part 'transformer.dart';
+part './transformer.dart';
 
 typedef LeanRequester = _LeanRequester;
 

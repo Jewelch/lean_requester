@@ -1,16 +1,23 @@
-part of "requester.dart";
+import 'dart:math' show Random, min;
+
+import 'package:cg_core_defs/helpers/debugging_printer.dart';
+import 'package:lean_requester/lean_interceptor.dart';
+import 'package:lean_requester/src/extensions/private_ext.dart';
+import 'package:lean_requester/src/extensions/shared_ext.dart';
+
+import './request_base.dart';
 
 mixin LeanRequesterMixin on LeanRequesterBase {
   Future<R> request<R, M extends DAO>({
-    bool debugRequest = true,
-    bool mockingEnabled = false,
     required M dao,
+    required String path,
+    required RestfulMethods method,
+    required String cachingKey,
     bool asList = false,
     String? listKey,
-    required String cachingKey,
+    bool debugIt = true,
+    bool mockIt = false,
     dynamic mockingData,
-    required RestfulMethods method,
-    required String path,
     String? baseUrl,
     dynamic body,
     ContentType? contentType,
@@ -25,7 +32,7 @@ mixin LeanRequesterMixin on LeanRequesterBase {
       ..setupOptions(baseOptions, baseUrl, contentType, headers, extraHeaders)
       ..setupInterceptors(
         queuedInterceptorsWrapper,
-        debugRequest,
+        debugIt,
         debuggingEnabled,
         logRequestHeaders,
         logResponseHeaders,
@@ -37,18 +44,18 @@ mixin LeanRequesterMixin on LeanRequesterBase {
         dao,
         asList,
         listKey,
-        mockingEnabled,
+        mockIt,
         mockingData,
         mockAwaitDurationMs,
       );
 
-    final transformer = dio.transformer as _LeanTransformer<R, M>;
+    final transformer = dio.transformer as LeanTransformer<R, M>;
 
     if (!connectivityMonitor.isConnected) {
       return await transformer.transformCachedData(cachingKey);
     }
 
-    if (mockingModeEnabled || mockingEnabled) {
+    if (mockingModeEnabled || mockIt) {
       return await transformer.transformMockResponse();
     }
 

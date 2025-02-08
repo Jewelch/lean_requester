@@ -9,7 +9,8 @@ abstract class CommonException implements Exception {
 }
 
 class UnsupportedDataTypeException extends CommonException {
-  UnsupportedDataTypeException() : super('Unsupported data type encountered during decoding.');
+  UnsupportedDataTypeException()
+      : super('Unsupported data type encountered during decoding.');
 }
 
 class InvalidResponseStatusCode extends CommonException {
@@ -21,7 +22,8 @@ final class DataDecodingException<M> extends CommonException {
   factory DataDecodingException.cache(dynamic e, StackTrace s) =>
       DataDecodingException._('Cache: $e', s);
 
-  factory DataDecodingException.mock(dynamic e, StackTrace s) => DataDecodingException._('Mock: $e', s);
+  factory DataDecodingException.mock(dynamic e, StackTrace s) =>
+      DataDecodingException._('Mock: $e', s);
 
   factory DataDecodingException.network(dynamic e, StackTrace s) =>
       DataDecodingException._('Network: $e', s);
@@ -34,8 +36,8 @@ final class ListKeyException extends CommonException {
   factory ListKeyException.notProvided() => ListKeyException._(
       "Received response is a Map, you have not provided a `listKey` though, you should be trying to anger me.");
 
-  factory ListKeyException.notExisting(String? listKey) =>
-      ListKeyException._("The specified list key [$listKey] does not exist in the received response.");
+  factory ListKeyException.notExisting(String? listKey) => ListKeyException._(
+      "The specified list key [$listKey] does not exist in the received response.");
 
   factory ListKeyException.unexpected(String? listKey) => ListKeyException._(
         "You have specified [$listKey] as the List key, but received response is a list, you should be trying to fool me..",
@@ -45,10 +47,12 @@ final class ListKeyException extends CommonException {
 }
 
 class ServerException extends CommonException {
-  ServerException([String? message]) : super(message ?? 'Server exception occurred.');
+  ServerException([String? message])
+      : super(message ?? 'Server exception occurred.');
 }
 
 final class NonExistingCacheDataException extends CommonException {
   NonExistingCacheDataException(String? cacheKey)
-      : super("The specified Cache Key [$cacheKey] does not exist in the cache data.");
+      : super(
+            "The specified Cache Key [$cacheKey] does not exist in the cache data.");
 }

@@ -17,10 +17,10 @@ dependencies:
   cg_core_defs:
     path: ../cg_core_defs
 
-  dio:
+  dio: ^5.8.0+1
   equatable:
   awesome_dio_interceptor:
-  shared_preferences: 
+  shared_preferences: ^2.5.1 
 
 dev_dependencies:
   flutter_test:
@@ -28,4 +28,3 @@ dev_dependencies:
   mocktail:
   flutter_lints:
 
-flutter:

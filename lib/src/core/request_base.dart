@@ -1,6 +1,7 @@
-part of "requester.dart";
+import 'package:cg_core_defs/cg_core_defs.dart';
+import 'package:lean_requester/lean_interceptor.dart';
 
-abstract class LeanRequesterBase {
+class LeanRequesterBase {
   LeanRequesterBase(
     this.dio,
     this.cacheManager,

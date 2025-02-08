@@ -1,6 +1,9 @@
-part of '../core/requester.dart';
+import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart';
+import 'package:cg_core_defs/cache/cache_manager.dart';
+import 'package:lean_requester/lean_interceptor.dart';
+import 'package:lean_requester/src/extensions/shared_ext.dart';
 
-extension _ListSecuredAdderExt<E> on List<E> {
+extension ListSecuredAdderExt<E> on List<E> {
   void ifNotNullAdd(E? element) {
     if (element == null) return;
     add(element);
@@ -27,7 +30,7 @@ extension DioComponentsExt on Dio {
 
   void setupInterceptors(
     QueuedInterceptorsWrapper? queuedInterceptorsWrapper,
-    bool debugRequest,
+    bool debugIt,
     bool debuggingEnabled,
     bool logRequestHeaders,
     bool logResponseHeaders,
@@ -37,7 +40,7 @@ extension DioComponentsExt on Dio {
         ..clear()
         ..ifNotNullAdd(queuedInterceptorsWrapper)
         ..addBasedOnCondition(
-          condition: debugRequest && debuggingEnabled,
+          condition: debugIt && debuggingEnabled,
           AwesomeDioInterceptor(
             logRequestHeaders: logRequestHeaders,
             logResponseHeaders: logResponseHeaders,
@@ -55,7 +58,7 @@ extension DioComponentsExt on Dio {
     dynamic mockingData,
     int mockAwaitDurationMs,
   ) =>
-      transformer = _LeanTransformer<R, M>(
+      transformer = LeanTransformer<R, M>(
         cacheManager,
         cachingKey,
         dao,

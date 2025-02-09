@@ -1,8 +1,9 @@
 import 'package:cg_core_defs/cg_core_defs.dart';
-import 'package:lean_requester/lean_interceptor.dart';
 
-class LeanRequesterBase {
-  LeanRequesterBase(
+import '../../../lean_interceptor.dart';
+
+class RequesterConfiguration {
+  RequesterConfiguration(
     this.dio,
     this.cacheManager,
     this.connectivityMonitor,

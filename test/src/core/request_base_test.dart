@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:cg_core_defs/cache/cache_manager.dart';
 import 'package:cg_core_defs/connectivity/connectivity_monitor.dart';
 import 'package:dio/dio.dart';
-import 'package:lean_requester/src/core/request_base.dart';
+import 'package:lean_requester/src/core/requester/requester_configuration.dart';
 
 import '../../tools/exports.dart';
 
@@ -17,13 +17,13 @@ void main() {
   late MockDio mockDio;
   late MockCacheManager mockCacheManager;
   late MockConnectivityMonitor mockConnectivityMonitor;
-  late LeanRequesterBase leanRequesterBase;
+  late RequesterConfiguration leanRequesterBase;
 
   setUp(() {
     mockDio = MockDio();
     mockCacheManager = MockCacheManager();
     mockConnectivityMonitor = MockConnectivityMonitor();
-    leanRequesterBase = LeanRequesterBase(
+    leanRequesterBase = RequesterConfiguration(
       mockDio,
       mockCacheManager,
       mockConnectivityMonitor,

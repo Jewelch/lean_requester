@@ -1,7 +1,8 @@
 import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart';
 import 'package:cg_core_defs/cache/cache_manager.dart';
-import 'package:lean_requester/lean_interceptor.dart';
-import 'package:lean_requester/src/extensions/shared_ext.dart';
+
+import '../../lean_interceptor.dart';
+import 'shared_ext.dart';
 
 extension ListSecuredAdderExt<E> on List<E> {
   void ifNotNullAdd(E? element) {
@@ -59,13 +60,12 @@ extension DioComponentsExt on Dio {
     int mockAwaitDurationMs,
   ) =>
       transformer = LeanTransformer<R, M>(
-        cacheManager,
-        cachingKey,
-        dao,
-        asList,
-        listKey,
-        mockingData,
-        mockingEnabled,
-        mockAwaitDurationMs,
+        cacheManager: cacheManager,
+        cachingKey: cachingKey,
+        dao: dao,
+        asList: asList,
+        listKey: listKey,
+        mockingData: mockingData,
+        mockAwaitTime: mockAwaitDurationMs,
       );
 }

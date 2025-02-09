@@ -1,13 +1,13 @@
 import 'dart:math' show Random, min;
 
 import 'package:cg_core_defs/helpers/debugging_printer.dart';
-import 'package:lean_requester/lean_interceptor.dart';
-import 'package:lean_requester/src/extensions/private_ext.dart';
-import 'package:lean_requester/src/extensions/shared_ext.dart';
 
-import './request_base.dart';
+import '../../../lean_interceptor.dart';
+import '../../extensions/private_ext.dart';
+import '../../extensions/shared_ext.dart';
+import 'requester_configuration.dart';
 
-mixin LeanRequesterMixin on LeanRequesterBase {
+mixin RequesterMixin on RequesterConfiguration {
   Future<R> request<R, M extends DAO>({
     required M dao,
     required String path,
@@ -52,14 +52,14 @@ mixin LeanRequesterMixin on LeanRequesterBase {
     final transformer = dio.transformer as LeanTransformer<R, M>;
 
     if (!connectivityMonitor.isConnected) {
-      return await transformer.transformCachedData(cachingKey);
+      return await transformer.transformCachedResponse();
     }
 
     if (mockingModeEnabled || mockIt) {
-      return await transformer.transformMockResponse();
+      return await transformer.transformMockedResponse();
     }
 
-    return await _attemptRequest(
+    return await _attemptNetworkRequest(
       path: path,
       body: body,
       queryParameters: queryParameters,
@@ -71,7 +71,7 @@ mixin LeanRequesterMixin on LeanRequesterBase {
     );
   }
 
-  Future<R> _attemptRequest<R>({
+  Future<R> _attemptNetworkRequest<R>({
     required String path,
     dynamic body,
     StringKeyedMap? queryParameters,
@@ -81,9 +81,8 @@ mixin LeanRequesterMixin on LeanRequesterBase {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    for (int attempt = 0; attempt < maxRetriesPerRequest; attempt++) {
-      if (attempt > 0)
-        Debugger.red('Attempt ${attempt + 1} for request to ${baseOptions.baseUrl + path}');
+    for (int attempt = 1; attempt <= maxRetriesPerRequest; attempt++) {
+      if (attempt > 1) Debugger.orange('Attempt $attempt for request to ${baseOptions.baseUrl + path}');
 
       try {
         final response = await dio.request(
@@ -96,27 +95,28 @@ mixin LeanRequesterMixin on LeanRequesterBase {
           onReceiveProgress: onReceiveProgress,
         );
         return response.data;
+      } on DioException catch (e) {
+        Debugger.red("|| DioException<${e.type}, ${(e.error as CommonException).runtimeType}>");
+        await _handleExceptions(attempt, path);
       } catch (e) {
-        if (attempt == maxRetriesPerRequest - 1)
-          throw ServerException(
-            'Request to ${baseOptions.baseUrl + path} failed after $maxRetriesPerRequest retries',
-          );
-
-        await Future.delayed(
-          Duration(
-            milliseconds: min(
-              (1 << attempt) * retryDelayMs + Random().nextInt(1000),
-              maxRetryDelayMs,
-            ),
-          ),
-        );
+        Debugger.red('Unexpected error during network request\n $e');
+        await _handleExceptions(attempt, path);
       }
     }
-    throw ServerException(
-      'Unexpected error occurred while processing the request to $path.\n'
-      'Method: ${method.name}\n'
-      'Query Parameters: ${queryParameters?.toString() ?? 'None'}\n'
-      'Body: ${body?.toString() ?? 'None'}',
-    );
+    throw ServerException.unexpected(baseOptions.baseUrl + path, methodName: method.name);
   }
+
+  Future<void> _handleExceptions(int attempt, String path) async {
+    if (attempt == maxRetriesPerRequest)
+      throw ServerException.maxRetriesReached(
+        baseOptions.baseUrl + path,
+        maxRetriesPerRequest: maxRetriesPerRequest,
+      );
+
+    await Future.delayed(_calculateDelayFor(attempt));
+  }
+
+  Duration _calculateDelayFor(int attempt) => Duration(
+        milliseconds: min((1 << (attempt - 1)) * retryDelayMs + Random().nextInt(1000), maxRetryDelayMs),
+      );
 }

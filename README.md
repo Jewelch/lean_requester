@@ -30,6 +30,7 @@ This package provides a robust and flexible HTTP requester built on top of the D
   - [DAO and DTO](#dao-and-dto)
   - [Data Handling](#data-handling)
 - [Error Handling](#error-handling)
+- [Retry Mechanism](#retry-mechanism)
 - [Enums](#enums)
 - [Typedefs](#typedefs)
 - [Implementation Examples](#implementation-examples)
@@ -165,6 +166,46 @@ class ServerException implements Exception {
   // Custom exception for server errors
 }
 ```
+
+## Retry Mechanism
+
+The system implements a retry mechanism for network requests to handle transient errors effectively. This mechanism is designed to automatically retry failed requests a specified number of times before giving up.
+
+### Exponential Backoff Strategy
+
+To avoid overwhelming the server during retries, an exponential backoff strategy is employed. The delay between each retry increases exponentially based on the number of attempts made. The delay is calculated using the following formula:
+
+```
+delay = (1 << (attempt - 1)) * retryDelayMs
+```
+
+Where:
+- `attempt` is the current retry attempt number (starting from 1).
+- `retryDelayMs` is the base delay in milliseconds.
+
+### Delay Calculations
+
+Here are the calculated delays for each retry attempt:
+
+- **Attempt 1**: `1 * retryDelayMs` (e.g., 1000 ms)
+- **Attempt 2**: `2 * retryDelayMs` (e.g., 2000 ms)
+- **Attempt 3**: `4 * retryDelayMs` (e.g., 4000 ms)
+- **Attempt 4**: `8 * retryDelayMs` (e.g., 8000 ms)
+- **Attempt 5**: `16 * retryDelayMs` (e.g., 16000 ms)
+- **Attempt 6**: `32 * retryDelayMs` (e.g., 32000 ms)
+
+### Example
+
+If `retryDelayMs` is set to `1000` ms (1 second), the delays for each attempt would be:
+
+- **Attempt 1**: 1000 ms (1 second)
+- **Attempt 2**: 2000 ms (2 seconds)
+- **Attempt 3**: 4000 ms (4 seconds)
+- **Attempt 4**: 8000 ms (8 seconds)
+- **Attempt 5**: 16000 ms (16 seconds)
+- **Attempt 6**: 32000 ms (32 seconds)
+
+This strategy helps to manage network load and increases the chances of successful requests in the face of temporary issues.
 
 ## Enums
 The `RestfulMethods` enum defines the HTTP methods supported by the library, providing a clear and type-safe way to specify the method for each request.

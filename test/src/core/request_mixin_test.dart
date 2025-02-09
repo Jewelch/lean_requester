@@ -127,7 +127,7 @@ void main() {
 
   test('request mixin returns cached data when offline', () async {
     when(() => mockLeanRequester.connectivityMonitor.isConnected).thenReturn(false);
-    when(() => (mockLeanRequester.dio.transformer as LeanTransformer).transformCachedData(any()))
+    when(() => (mockLeanRequester.dio.transformer as LeanTransformer).transformCachedResponse())
         .thenAnswer((_) async => 'Cached Data');
 
     final result = await mockLeanRequester.request<String, MockDAO>(
@@ -141,7 +141,7 @@ void main() {
   });
 
   test('request mixin returns mock data when mocking is enabled', () async {
-    when(() => (mockLeanRequester.dio.transformer as LeanTransformer).transformMockResponse())
+    when(() => (mockLeanRequester.dio.transformer as LeanTransformer).transformMockedResponse())
         .thenAnswer((_) async => 'Mock Data');
 
     final result = await mockLeanRequester.request<String, MockDAO>(

@@ -24,7 +24,7 @@ class MockedResponseTransformationStrategy<R, M extends DAO> extends ResponseTra
     if (requirements.dao is NoDataModel) return requirements.dao.fromJson(true) as R;
 
     return await decodeDataBasedOnStrategy(
-      RTStrategies.mock,
+      TransformerStrategies.mock,
       requirements: requirements,
       data: mockingData,
     );

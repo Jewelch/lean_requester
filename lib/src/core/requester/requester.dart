@@ -13,10 +13,8 @@ import 'requester_mixin.dart';
 
 part '../transformer/transformer.dart';
 
-typedef LeanRequester = _LeanRequester;
-
-class _LeanRequester extends RequesterConfiguration with RequesterMixin {
-  _LeanRequester(
+class LeanRequester extends RequesterConfiguration with RequesterMixin {
+  LeanRequester(
     super.dio,
     super.cacheManager,
     super.connectivityMonitor,

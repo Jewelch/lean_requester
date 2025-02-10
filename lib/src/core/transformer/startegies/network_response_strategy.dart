@@ -23,14 +23,14 @@ class NetworkResponseTransformationStrategy<R, M extends DAO> extends ResponseTr
     ResponseBody? responseBody,
     dynamic data,
   }) async {
-    responseAssertion(responseBody);
+    validateResponse(responseBody);
 
     if (requirements.dao is NoDataModel) {
       return requirements.dao.fromJson(responseBody!.statusCode >= 200 && responseBody.statusCode < 300);
     }
 
     final R decodedData = await decodeDataBasedOnStrategy(
-      RTStrategies.network,
+      TransformerStrategies.network,
       requirements: requirements,
       data: data,
     );
@@ -38,7 +38,7 @@ class NetworkResponseTransformationStrategy<R, M extends DAO> extends ResponseTr
     return decodedData;
   }
 
-  void responseAssertion(ResponseBody? responseBody) {
+  void validateResponse(ResponseBody? responseBody) {
     if (responseBody == null) {
       throw ResponseBodyException.isNull();
     }

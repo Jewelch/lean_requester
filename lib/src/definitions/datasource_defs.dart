@@ -4,4 +4,7 @@ import '../models/index.dart';
 typedef DataSourceSingleResult<M extends DAO> = Future<M>;
 
 /// A typedef for a Future that returns a list of DAO objects.
-typedef DataSourceListResult<M extends DAO> = Future<List<M>>;
+typedef DataSourceResultAsListOf<M extends DAO> = Future<List<M>>;
+
+Future<List<T>> futureListOf<T extends DAO>({required Future<DaoList<T>> from}) async =>
+    await from.then((value) => value.list ?? []);

@@ -6,7 +6,7 @@ import '../../../errors/exceptions.dart';
 import '../../../extensions/shared_ext.dart';
 
 abstract class ResponseTransformationStrategy<R, M extends DAO> with DataTransformationMixin<R, M> {
-  final RTStrategyRequirements<M> requirements;
+  final TransformerRequirements<M> requirements;
 
   const ResponseTransformationStrategy(this.requirements);
 
@@ -18,11 +18,12 @@ abstract class ResponseTransformationStrategy<R, M extends DAO> with DataTransfo
 
 mixin DataTransformationMixin<R, M extends DAO> {
   Future<R> decodeDataBasedOnStrategy(
-    RTStrategies strategy, {
-    required RTStrategyRequirements<M> requirements,
+    TransformerStrategies strategy, {
+    required TransformerRequirements<M> requirements,
     required dynamic data,
   }) async {
-    validateData(data, requirements.asList, requirements.listKey);
+    validateData(data);
+    validateListKey(data, requirements.asList, requirements.listKey);
 
     try {
       return (requirements.asList)
@@ -38,41 +39,36 @@ mixin DataTransformationMixin<R, M extends DAO> {
 
   void validateData(
     dynamic data,
+  ) {
+    if (data is! List && data is! StringKeyedMap && data is! String) {
+      throw UnsupportedDataTypeException(data.runtimeType);
+    }
+  }
+
+  void validateListKey(
+    dynamic data,
     bool asList,
     String? listKey,
   ) {
-    if (data is! List && data is! StringKeyedMap && data is! String) {
-      throw UnsupportedDataTypeException();
+    if (data is List) {
+      if (listKey != null) throw ListKeyException.unexpected(listKey);
     }
 
-    if (data is List && listKey != null) {
-      throw ListKeyException.unexpected(listKey);
-    }
-
-    if (data is StringKeyedMap && asList && listKey == null) {
-      throw ListKeyException.notProvided();
-    }
-
-    if (data is StringKeyedMap && listKey != null && !data.containsKey(listKey)) {
-      throw ListKeyException.notExisting(listKey);
+    if (data is StringKeyedMap) {
+      if (asList && listKey == null) {
+        throw ListKeyException.notProvided();
+      }
+      if (listKey != null && !data.containsKey(listKey)) {
+        throw ListKeyException.notExisting(listKey);
+      }
     }
   }
 }
 
-enum RTStrategies {
+enum TransformerStrategies {
   cache,
   mock,
   network,
 }
 
-class RTStrategyRequirements<M extends DAO> {
-  final M dao;
-  final bool asList;
-  final String? listKey;
-
-  const RTStrategyRequirements(
-    this.dao,
-    this.asList,
-    this.listKey,
-  );
-}
+typedef TransformerRequirements<M extends DAO> = ({M dao, bool asList, String? listKey});

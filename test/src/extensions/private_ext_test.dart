@@ -89,12 +89,9 @@ void main() {
 
     test('setupTransformer sets Dio transformer correctly', () {
       mockDio.setupTransformer(
+        (dao: mockDAO, asList: false, listKey: null),
         mockCacheManager,
         'testKey',
-        mockDAO,
-        false,
-        null,
-        false,
         {},
         100,
       );

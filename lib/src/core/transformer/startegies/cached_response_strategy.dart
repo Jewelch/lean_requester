@@ -28,7 +28,7 @@ class CachedResponseTransformationStrategy<R, M extends DAO> extends ResponseTra
     if (cachedDataString == null) throw NonExistingCacheDataException(cachingKey);
 
     return await decodeDataBasedOnStrategy(
-      RTStrategies.cache,
+      TransformerStrategies.cache,
       requirements: requirements,
       data: await compute((input) => jsonDecode(input), cachedDataString),
     );

@@ -20,8 +20,6 @@ class RequesterConfiguration {
         contentType: ContentType.json.mimeType,
       );
 
-  Map<String, dynamic> get headers => {};
-
   QueuedInterceptorsWrapper? get queuedInterceptorsWrapper => null;
 
   bool get mockingModeEnabled => false;
@@ -34,4 +32,6 @@ class RequesterConfiguration {
   bool get logRequestHeaders => false;
   bool get logResponseHeaders => false;
   bool get logRequestTimeout => false;
+
+  Map<String, dynamic> get headers => {};
 }

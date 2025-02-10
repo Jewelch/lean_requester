@@ -6,12 +6,13 @@ abstract class CommonException implements Exception {
   final String message;
 
   CommonException(this.message) {
-    Debugger.red(message);
+    Debugger.red('$runtimeType: $message');
   }
 }
 
 class UnsupportedDataTypeException extends CommonException {
-  UnsupportedDataTypeException() : super('Unsupported data type encountered during decoding.');
+  UnsupportedDataTypeException(Type runtimeType)
+      : super('Unsupported data type encountered during decoding: $runtimeType');
 }
 
 class ResponseBodyException extends CommonException {
@@ -43,20 +44,19 @@ class ServerException extends CommonException {
 }
 
 final class NonExistingCacheDataException extends CommonException {
-  NonExistingCacheDataException(String? cacheKey)
-      : super("The specified Cache Key [$cacheKey] does not exist in the cache data.");
+  NonExistingCacheDataException(String? cacheKey) : super("Cache key [$cacheKey] not found in cache.");
 }
 
 final class DataDecodingException<M> extends CommonException {
   factory DataDecodingException.basedOn(
-    RTStrategies strategy,
+    TransformerStrategies strategy,
     dynamic exception,
     StackTrace s,
   ) =>
       switch (strategy) {
-        RTStrategies.cache => DataDecodingException<M>._('Cache: $exception', s),
-        RTStrategies.mock => DataDecodingException<M>._('Mock: $exception', s),
-        RTStrategies.network => DataDecodingException<M>._('Network: $exception', s),
+        TransformerStrategies.cache => DataDecodingException<M>._('Cache: $exception', s),
+        TransformerStrategies.mock => DataDecodingException<M>._('Mock: $exception', s),
+        TransformerStrategies.network => DataDecodingException<M>._('Network: $exception', s),
       };
 
   DataDecodingException._(
@@ -67,15 +67,15 @@ final class DataDecodingException<M> extends CommonException {
 
 final class ListKeyException extends CommonException {
   factory ListKeyException.notProvided() => ListKeyException._(
-        "Received response is a Map, you have not provided a `listKey` though, you should be trying to anger me.",
+        "Response is a Map, but no `listKey` provided.",
       );
 
   factory ListKeyException.notExisting(String? listKey) => ListKeyException._(
-        "The specified list key [$listKey] does not exist in the received response.",
+        "List key '$listKey' not found in response.",
       );
 
   factory ListKeyException.unexpected(String? listKey) => ListKeyException._(
-        "You have specified [$listKey] as the List key, but received response is a list, you should be trying to fool me..",
+        "Expected a Map with key '$listKey', but received a List instead.",
       );
 
   ListKeyException._(super.message);

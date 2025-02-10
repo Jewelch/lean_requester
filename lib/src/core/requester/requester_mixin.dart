@@ -5,16 +5,16 @@ import 'package:cg_core_defs/helpers/debugging_printer.dart';
 import '../../../lean_interceptor.dart';
 import '../../extensions/private_ext.dart';
 import '../../extensions/shared_ext.dart';
+import '../transformer/definitons/response_transformation_strategy.dart';
 import 'requester_configuration.dart';
 
 mixin RequesterMixin on RequesterConfiguration {
   Future<R> request<R, M extends DAO>({
-    required M dao,
+    TransformerRequirements<M>? requirements,
+    M? requirement,
     required String path,
     required RestfulMethods method,
     required String cachingKey,
-    bool asList = false,
-    String? listKey,
     bool debugIt = true,
     bool mockIt = false,
     dynamic mockingData,
@@ -28,6 +28,11 @@ mixin RequesterMixin on RequesterConfiguration {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
+    assert(
+      requirement != null || requirements != null,
+      'Either requirement (DAO) or requirements (DAO, asList, listKey) must be provided',
+    );
+
     dio
       ..setupOptions(baseOptions, baseUrl, contentType, headers, extraHeaders)
       ..setupInterceptors(
@@ -39,12 +44,9 @@ mixin RequesterMixin on RequesterConfiguration {
         logRequestTimeout,
       )
       ..setupTransformer<R, M>(
+        requirements ?? (dao: requirement!, asList: false, listKey: null),
         cacheManager,
         cachingKey,
-        dao,
-        asList,
-        listKey,
-        mockIt,
         mockingData,
         mockAwaitDurationMs,
       );

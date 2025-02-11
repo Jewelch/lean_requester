@@ -1,8 +1,8 @@
-import 'dart:convert';
+import 'dart:convert' show jsonDecode;
 
 import 'package:cg_core_defs/cache/cache_manager.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+import 'package:dio/dio.dart' show ResponseBody;
+import 'package:flutter/foundation.dart' show compute;
 
 import '../../../errors/index.dart' show NonExistingCacheDataException;
 import '../../../models/data_objects.dart';

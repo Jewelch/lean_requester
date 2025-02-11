@@ -1,5 +1,5 @@
 import 'package:cg_core_defs/cache/cache_manager.dart';
-import 'package:lean_requester/lean_interceptor.dart';
+import 'package:lean_requester/lean_requester.dart';
 import 'package:lean_requester/src/extensions/private_ext.dart';
 import 'package:lean_requester/src/extensions/shared_ext.dart';
 

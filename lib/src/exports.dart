@@ -1,5 +1,6 @@
-export 'dart:convert';
-export 'dart:io';
+export 'dart:convert' show jsonDecode, jsonEncode;
+
+// export 'dart:io';
 
 export 'package:dio/dio.dart';
 export 'package:equatable/equatable.dart';

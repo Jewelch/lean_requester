@@ -1,10 +1,10 @@
 import 'dart:convert' show jsonEncode;
 
 import 'package:cg_core_defs/cache/cache_manager.dart';
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' show ResponseBody;
 import 'package:flutter/foundation.dart' show compute;
 
-import '../../../../models_exp.dart';
+import '../../../../models_exp.dart' show DAO, DaoList, NoDataModel;
 import '../../../errors/index.dart' show ResponseBodyException;
 import '../definitons/response_transformation_strategy.dart';
 

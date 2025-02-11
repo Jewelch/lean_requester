@@ -1,5 +1,5 @@
-import 'package:cg_core_defs/cg_core_defs.dart';
-import 'package:equatable/equatable.dart';
+import 'package:cg_core_defs/cg_core_defs.dart' show Debugger;
+import 'package:equatable/equatable.dart' show Equatable;
 
 abstract class CommonException implements Exception {
   final String message;

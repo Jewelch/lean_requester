@@ -1,8 +1,9 @@
-import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart';
+import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart' show AwesomeDioInterceptor;
 import 'package:cg_core_defs/cache/cache_manager.dart';
 
-import '../../lean_interceptor.dart';
+import '../../lean_requester.dart' show BaseOptions, ContentType, Dio, QueuedInterceptorsWrapper, DAO;
 import '../core/transformer/definitons/response_transformation_strategy.dart';
+import '../core/transformer/transformer.dart';
 import 'shared_ext.dart';
 
 extension ListSecuredAdderExt<E> on List<E> {
@@ -17,18 +18,16 @@ extension ListSecuredAdderExt<E> on List<E> {
 }
 
 extension DioComponentsExt on Dio {
-  void setupOptions(
+  Future<void> setupOptions(
     BaseOptions baseOptions,
     String? baseUrl,
-    ContentType? contentType,
-    StringKeyedMap defaultHeaders,
-    StringKeyedMap? extraHeaders,
-  ) =>
+    ContentType? contentType, {
+    required StringKeyedMap headers,
+  }) async =>
       options = baseOptions
         ..baseUrl = baseUrl ?? baseOptions.baseUrl
         ..contentType = contentType?.mimeType ?? ContentType.json.mimeType
-        ..headers.addExtraHeaders(extraHeaders)
-        ..headers.addAll(defaultHeaders);
+        ..headers.addAll(headers);
 
   void setupInterceptors(
     QueuedInterceptorsWrapper? queuedInterceptorsWrapper,
@@ -42,7 +41,7 @@ extension DioComponentsExt on Dio {
         ..clear()
         ..ifNotNullAdd(queuedInterceptorsWrapper)
         ..addBasedOnCondition(
-          condition: debugIt && debuggingEnabled,
+          condition: debugIt || debuggingEnabled,
           AwesomeDioInterceptor(
             logRequestHeaders: logRequestHeaders,
             logResponseHeaders: logResponseHeaders,

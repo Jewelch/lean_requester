@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart' show ResponseBody;
 
 import '../../../models/data_objects.dart';
 import '../../../models/no_data_model.dart';

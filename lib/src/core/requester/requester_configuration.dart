@@ -1,6 +1,8 @@
-import 'package:cg_core_defs/cg_core_defs.dart';
+import 'package:cg_core_defs/cg_core_defs.dart' show CacheManager, ConnectivityMonitor;
 
-import '../../../lean_interceptor.dart';
+import '../../../lean_requester.dart' show BaseOptions, ContentType, Dio, QueuedInterceptorsWrapper;
+import '../../extensions/shared_ext.dart';
+import '../transformer/definitons/authentication_strategy.dart';
 
 class RequesterConfiguration {
   RequesterConfiguration(
@@ -22,6 +24,9 @@ class RequesterConfiguration {
 
   QueuedInterceptorsWrapper? get queuedInterceptorsWrapper => null;
 
+  StringKeyedMap? get commonHeaders => {};
+  AuthenticationStrategy? get authenticationStrategy => null;
+
   bool get mockingModeEnabled => false;
   int get maxRetriesPerRequest => 3;
   int get mockAwaitDurationMs => 500;
@@ -32,6 +37,4 @@ class RequesterConfiguration {
   bool get logRequestHeaders => false;
   bool get logResponseHeaders => false;
   bool get logRequestTimeout => false;
-
-  Map<String, dynamic> get headers => {};
 }

@@ -1,13 +1,17 @@
 import 'dart:math' show Random, min;
 
 import 'package:cg_core_defs/helpers/debugging_printer.dart';
+import 'package:dio/dio.dart' show CancelToken, DioException, Options, ProgressCallback, DioMixin;
 
-import '../../../datasource_exp.dart';
-import '../../../models_exp.dart';
+import '../../../datasource_exp.dart' show ContentType;
+import '../../../models_exp.dart' show DAO;
+import '../../definitions/restful_methods.dart';
+import '../../errors/index.dart' show CommonException, ServerException;
 import '../../extensions/private_ext.dart';
 import '../../extensions/shared_ext.dart';
 import '../transformer/definitons/response_transformation_strategy.dart';
-import './requester_configuration.dart';
+import '../transformer/transformer.dart';
+import 'requester_configuration.dart';
 
 mixin RequesterMixin on RequesterConfiguration {
   Future<R> request<R, M extends DAO>({
@@ -15,7 +19,7 @@ mixin RequesterMixin on RequesterConfiguration {
     M? requirement,
     required String path,
     required RestfulMethods method,
-    required String cachingKey,
+    String? cachingKey,
     bool debugIt = true,
     bool mockIt = false,
     dynamic mockingData,
@@ -34,8 +38,18 @@ mixin RequesterMixin on RequesterConfiguration {
       'Either requirement (DAO) or requirements (DAO, asList, listKey) must be provided',
     );
 
+    await dio.setupOptions(
+      baseOptions,
+      baseUrl,
+      contentType,
+      headers: {
+        ...?(await authenticationStrategy?.getAuthorizationHeader()),
+        ...?commonHeaders,
+        ...?extraHeaders,
+      },
+    );
+
     dio
-      ..setupOptions(baseOptions, baseUrl, contentType, headers, extraHeaders)
       ..setupInterceptors(
         queuedInterceptorsWrapper,
         debugIt,
@@ -47,7 +61,7 @@ mixin RequesterMixin on RequesterConfiguration {
       ..setupTransformer<R, M>(
         requirements ?? (dao: requirement!, asList: false, listKey: null),
         cacheManager,
-        cachingKey,
+        cachingKey ?? path,
         mockingData,
         mockAwaitDurationMs,
       );

@@ -5,7 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show compute;
 
 import '../../../../models_exp.dart';
-import '../../../errors/exceptions.dart';
+import '../../../errors/index.dart' show ResponseBodyException;
 import '../definitons/response_transformation_strategy.dart';
 
 class NetworkResponseTransformationStrategy<R, M extends DAO> extends ResponseTransformationStrategy<R, M> {

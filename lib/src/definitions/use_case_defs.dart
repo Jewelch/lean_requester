@@ -11,7 +11,7 @@ abstract class UseCase<Entity extends DTO, Model extends DAO, Params> {
   // Define the mapping function
   final Entity Function(Model) modelToEntityMapper;
 
-  UseCase({
+  const UseCase({
     required this.modelToEntityMapper,
   });
 
@@ -20,7 +20,7 @@ abstract class UseCase<Entity extends DTO, Model extends DAO, Params> {
 
 abstract class SingleResultUseCase<Entity extends DTO, Model extends DAO, Params>
     extends UseCase<Entity, Model, Params> {
-  SingleResultUseCase({
+  const SingleResultUseCase({
     required super.modelToEntityMapper,
     required this.dataSourceEntry,
   });
@@ -39,12 +39,12 @@ abstract class SingleResultUseCase<Entity extends DTO, Model extends DAO, Params
 }
 
 abstract class ListResultUseCase<Entity extends DTO, Model extends DAO, Params> extends UseCase<Entity, Model, Params> {
-  ListResultUseCase({
+  const ListResultUseCase({
     required super.modelToEntityMapper,
     required this.dataSourceEntry,
   });
 
-  Future<List<Model>> Function(Params) dataSourceEntry;
+  final Future<List<Model>> Function(Params) dataSourceEntry;
 
   @override
   UseCaseResult<List<Entity>> call(Params params) async {

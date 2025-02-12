@@ -7,5 +7,5 @@ typedef DataSourceSingleResult<M extends DAO> = Future<M>;
 typedef DataSourceListResult<M extends DAO> = Future<List<M>>;
 
 extension DaoListExt on Future {
-  DataSourceListResult<M> toFutureListOf<M extends DAO>() async => (await this).list?.cast<M>() ?? <M>[];
+  DataSourceListResult<M> toListOf<M extends DAO>() async => (await this).list?.cast<M>() ?? <M>[];
 }

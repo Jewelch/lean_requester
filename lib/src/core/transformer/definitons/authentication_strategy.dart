@@ -1,10 +1,11 @@
 import '../../../extensions/shared_ext.dart';
 
 abstract class AuthenticationStrategy {
-  const AuthenticationStrategy();
-
   Future<StringKeyedMap> getAuthorizationHeader();
+
+  String toLocalTime(DateTime? dateTime) => dateTime?.toLocal().toString().split(' ')[1].substring(0, 8) ?? '';
 }
+
 
 
 //= class OAuthAuthentication implements AuthenticationStrategy {

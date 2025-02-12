@@ -7,6 +7,16 @@ class LeanRequester extends RequesterConfiguration with RequesterMixin {
   LeanRequester(
     super.dio,
     super.cacheManager,
-    super.connectivityMonitor,
-  );
+    super.connectivityMonitor, {
+    super.authenticationStrategy,
+    super.baseOptions,
+    super.queuedInterceptorsWrapper,
+    super.commonHeaders,
+    super.mockingModeEnabled,
+    super.maxRetriesPerRequest,
+    super.mockAwaitDurationMs,
+    super.retryDelayMs,
+    super.debuggingEnabled,
+    super.logRequestHeaders,
+  });
 }

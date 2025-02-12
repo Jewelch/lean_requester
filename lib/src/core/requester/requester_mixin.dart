@@ -20,7 +20,7 @@ mixin RequesterMixin on RequesterConfiguration {
     required String path,
     required RestfulMethods method,
     String? cachingKey,
-    bool debugIt = true,
+    bool debugIt = false,
     bool mockIt = false,
     dynamic mockingData,
     String? baseUrl,

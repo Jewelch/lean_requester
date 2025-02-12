@@ -8,33 +8,48 @@ class RequesterConfiguration {
   RequesterConfiguration(
     this.dio,
     this.cacheManager,
-    this.connectivityMonitor,
-  );
+    this.connectivityMonitor, {
+    this.authenticationStrategy,
+    BaseOptions? baseOptions,
+    this.queuedInterceptorsWrapper,
+    this.commonHeaders,
+    this.mockingModeEnabled = false,
+    this.maxRetriesPerRequest = 3,
+    this.mockAwaitDurationMs = 500,
+    this.retryDelayMs = 2000,
+    this.maxRetryDelayMs = 10000,
+    this.debuggingEnabled = false,
+    this.logRequestHeaders = false,
+    this.logResponseHeaders = false,
+    this.logRequestTimeout = false,
+  }) : baseOptions = baseOptions ??
+            BaseOptions(
+              connectTimeout: Duration(milliseconds: 20000),
+              sendTimeout: Duration(milliseconds: 20000),
+              receiveTimeout: Duration(milliseconds: 20000),
+              contentType: ContentType.json.mimeType,
+            );
 
   final Dio dio;
   final CacheManager cacheManager;
   final ConnectivityMonitor connectivityMonitor;
 
-  BaseOptions get baseOptions => BaseOptions(
-        connectTimeout: Duration(milliseconds: 20000),
-        sendTimeout: Duration(milliseconds: 20000),
-        receiveTimeout: Duration(milliseconds: 20000),
-        contentType: ContentType.json.mimeType,
-      );
+  final AuthenticationStrategy? authenticationStrategy;
 
-  QueuedInterceptorsWrapper? get queuedInterceptorsWrapper => null;
+  final BaseOptions baseOptions;
 
-  StringKeyedMap? get commonHeaders => {};
-  AuthenticationStrategy? get authenticationStrategy => null;
+  final StringKeyedMap? commonHeaders;
 
-  bool get mockingModeEnabled => false;
-  int get maxRetriesPerRequest => 3;
-  int get mockAwaitDurationMs => 500;
-  int get retryDelayMs => 2000;
-  int get maxRetryDelayMs => 10000;
+  final QueuedInterceptorsWrapper? queuedInterceptorsWrapper;
 
-  bool get debuggingEnabled => false;
-  bool get logRequestHeaders => false;
-  bool get logResponseHeaders => false;
-  bool get logRequestTimeout => false;
+  final bool mockingModeEnabled;
+  final int maxRetriesPerRequest;
+  final int mockAwaitDurationMs;
+  final int retryDelayMs;
+  final int maxRetryDelayMs;
+
+  final bool debuggingEnabled;
+  final bool logRequestHeaders;
+  final bool logResponseHeaders;
+  final bool logRequestTimeout;
 }

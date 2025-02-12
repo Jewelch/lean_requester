@@ -1,16 +1,13 @@
 import '../../../extensions/shared_ext.dart';
 
 abstract class AuthenticationStrategy {
-  StringKeyedMap? cachedHeaders;
+  const AuthenticationStrategy();
 
   Future<StringKeyedMap> getAuthorizationHeader();
-
-  // Closure to specify conditions for invalidation
-  void invalidateAuthenticationHeadersWhen(bool Function() condition);
 }
 
 
-// class OAuthAuthentication implements AuthenticationStrategy {
+//= class OAuthAuthentication implements AuthenticationStrategy {
 //   final String clientId;
 //   final String clientSecret;
 
@@ -18,14 +15,14 @@ abstract class AuthenticationStrategy {
 
 //   @override
 //   Future<StringKeyedMap> getAuthorizationHeader() async {
-//     // Implement the logic to obtain the OAuth token
-//     // This is a placeholder; you would typically make a network request here
+//+      Implement the logic to obtain the OAuth token
+//+      This is a placeholder; you would typically make a network request here
         // return {'Authorization': 'Bearer <OAuth_Token>'};
 //   }
 // }
 
 
-// class JwtAuthentication implements AuthenticationStrategy {
+//! class JwtAuthentication implements AuthenticationStrategy {
 //   final String token;
 
 //   JwtAuthentication(this.token);
@@ -37,7 +34,7 @@ abstract class AuthenticationStrategy {
 // }
 
 
-// class ApiKeyAuthentication implements AuthenticationStrategy {
+//& class ApiKeyAuthentication implements AuthenticationStrategy {
 //   final String apiKey;
 
 //   ApiKeyAuthentication(this.apiKey);

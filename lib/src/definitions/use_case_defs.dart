@@ -7,50 +7,23 @@ import '../models/either.dart';
 export 'package:dio/dio.dart';
 export 'package:equatable/equatable.dart';
 
-abstract class UseCase<Entity extends DTO, Model extends DAO, Params> {
-  // Define the mapping function
-  final Entity Function(Model) modelToEntityMapper;
-
+abstract class UseCase<E extends DTO, M extends DAO, R> {
   const UseCase({
     required this.modelToEntityMapper,
+    required this.dataSourceFetcher,
   });
 
-  UseCaseResult call(Params params);
-}
+  final E Function(M) modelToEntityMapper;
+  final Future<dynamic> Function(dynamic) dataSourceFetcher;
 
-abstract class SingleResultUseCase<Entity extends DTO, Model extends DAO, Params>
-    extends UseCase<Entity, Model, Params> {
-  const SingleResultUseCase({
-    required super.modelToEntityMapper,
-    required this.dataSourceEntry,
-  });
-
-  final Future<Model> Function(Params) dataSourceEntry;
-
-  @override
-  UseCaseResult<Entity> call(Params params) async {
+  UseCaseResult<R> call(dynamic params) async {
     try {
-      final model = await dataSourceEntry.call(params);
-      return Right(modelToEntityMapper(model));
-    } on CommonException catch (e) {
-      return Left(Failure(message: e.message));
-    }
-  }
-}
-
-abstract class ListResultUseCase<Entity extends DTO, Model extends DAO, Params> extends UseCase<Entity, Model, Params> {
-  const ListResultUseCase({
-    required super.modelToEntityMapper,
-    required this.dataSourceEntry,
-  });
-
-  final Future<List<Model>> Function(Params) dataSourceEntry;
-
-  @override
-  UseCaseResult<List<Entity>> call(Params params) async {
-    try {
-      final model = await dataSourceEntry.call(params);
-      return Right(model.map(modelToEntityMapper).toList());
+      final result = await dataSourceFetcher(params);
+      if (R == List<E>) {
+        return Right((result as List<M>).map(modelToEntityMapper).toList() as R);
+      } else {
+        return Right(modelToEntityMapper(result as M) as R);
+      }
     } on CommonException catch (e) {
       return Left(Failure(message: e.message));
     }

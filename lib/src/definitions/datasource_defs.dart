@@ -1,4 +1,4 @@
-import '../models/index.dart' show DAO;
+import 'package:lean_requester/models_exp.dart';
 
 /// A typedef for a Future that returns a single DAO model.
 typedef DataSourceSingleResult<M extends DAO> = Future<M>;
@@ -7,5 +7,5 @@ typedef DataSourceSingleResult<M extends DAO> = Future<M>;
 typedef DataSourceListResult<M extends DAO> = Future<List<M>>;
 
 extension DaoListExt on Future {
-  DataSourceListResult<M> toListOf<M extends DAO>() async => (await this).list?.cast<M>() ?? <M>[];
+  DataSourceListResult<M> toListOf<M extends DAO>() async => ((await this) as DaoList<M>?)?.list?.cast<M>() ?? <M>[];
 }

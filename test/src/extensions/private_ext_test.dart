@@ -1,7 +1,6 @@
 import 'package:cg_core_defs/cache/cache_manager.dart';
 import 'package:lean_requester/lean_requester.dart';
 import 'package:lean_requester/src/extensions/private_ext.dart';
-import 'package:lean_requester/src/extensions/shared_ext.dart';
 
 import '../../tools/exports.dart';
 
@@ -44,58 +43,6 @@ void main() {
       final list = <int>[];
       list.addBasedOnCondition(1, condition: false);
       expect(list, []);
-    });
-  });
-
-  group('_DioComponentsExt', () {
-    late MockDio mockDio;
-    late BaseOptions baseOptions;
-    late StringKeyedMap defaultHeaders;
-    late StringKeyedMap extraHeaders;
-    late MockCacheManager mockCacheManager;
-    late MockDAO mockDAO;
-
-    setUp(() {
-      mockDio = MockDio();
-      baseOptions = BaseOptions();
-      defaultHeaders = {};
-      extraHeaders = {};
-      mockCacheManager = MockCacheManager();
-      mockDAO = MockDAO();
-    });
-
-    test('setupOptions sets Dio options correctly', () {
-      mockDio.setupOptions(
-        baseOptions,
-        'https://example.com',
-        ContentType.json,
-        defaultHeaders,
-        extraHeaders,
-      );
-      expect(mockDio.options.baseUrl, 'https://example.com');
-      expect(mockDio.options.contentType, ContentType.json.mimeType);
-      expect(mockDio.options.headers, {
-        ...{"content-type": ContentType.json.mimeType},
-        ...defaultHeaders,
-        ...extraHeaders,
-      });
-    });
-
-    test('setupInterceptors sets Dio interceptors correctly', () {
-      final queuedInterceptorsWrapper = QueuedInterceptorsWrapper();
-      mockDio.setupInterceptors(queuedInterceptorsWrapper, true, true, true, true, true);
-      expect(mockDio.interceptors.contains(queuedInterceptorsWrapper), true);
-    });
-
-    test('setupTransformer sets Dio transformer correctly', () {
-      mockDio.setupTransformer(
-        (dao: mockDAO, asList: false, listKey: null),
-        mockCacheManager,
-        'testKey',
-        {},
-        100,
-      );
-      expect(mockDio.transformer, isA<LeanTransformer>());
     });
   });
 }

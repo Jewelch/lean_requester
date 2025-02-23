@@ -17,13 +17,13 @@ void main() {
   late MockDio mockDio;
   late MockCacheManager mockCacheManager;
   late MockConnectivityMonitor mockConnectivityMonitor;
-  late RequesterConfiguration leanRequesterBase;
+  late RequesterConfiguration requesterConfiguration;
 
   setUp(() {
     mockDio = MockDio();
     mockCacheManager = MockCacheManager();
     mockConnectivityMonitor = MockConnectivityMonitor();
-    leanRequesterBase = RequesterConfiguration(
+    requesterConfiguration = RequesterConfiguration(
       mockDio,
       mockCacheManager,
       mockConnectivityMonitor,
@@ -31,54 +31,54 @@ void main() {
   });
 
   test('baseOptions should have correct values', () {
-    final baseOptions = leanRequesterBase.baseOptions;
+    final baseOptions = requesterConfiguration.baseOptions;
     expect(baseOptions.connectTimeout, Duration(milliseconds: 20000));
     expect(baseOptions.sendTimeout, Duration(milliseconds: 20000));
     expect(baseOptions.receiveTimeout, Duration(milliseconds: 20000));
     expect(baseOptions.contentType, ContentType.json.mimeType);
   });
 
-  test('headers should be empty by default', () {
-    expect(leanRequesterBase.headers, {});
+  test('headers should be null by default', () {
+    expect(requesterConfiguration.commonHeaders, null);
   });
 
   test('queuedInterceptorsWrapper should be null by default', () {
-    expect(leanRequesterBase.queuedInterceptorsWrapper, isNull);
+    expect(requesterConfiguration.queuedInterceptorsWrapper, isNull);
   });
 
   test('mockingModeEnabled should be false by default', () {
-    expect(leanRequesterBase.mockingModeEnabled, isFalse);
+    expect(requesterConfiguration.mockingModeEnabled, isFalse);
   });
 
   test('maxRetriesPerRequest should be 3 by default', () {
-    expect(leanRequesterBase.maxRetriesPerRequest, 3);
+    expect(requesterConfiguration.maxRetriesPerRequest, 3);
   });
 
   test('mockAwaitDurationMs should be 500 by default', () {
-    expect(leanRequesterBase.mockAwaitDurationMs, 500);
+    expect(requesterConfiguration.mockAwaitDurationMs, 500);
   });
 
   test('retryDelayMs should be 2000 by default', () {
-    expect(leanRequesterBase.retryDelayMs, 2000);
+    expect(requesterConfiguration.retryDelayMs, 2000);
   });
 
   test('maxRetryDelayMs should be 10000 by default', () {
-    expect(leanRequesterBase.maxRetryDelayMs, 10000);
+    expect(requesterConfiguration.maxRetryDelayMs, 10000);
   });
 
   test('debuggingEnabled should be false by default', () {
-    expect(leanRequesterBase.debuggingEnabled, isFalse);
+    expect(requesterConfiguration.debuggingEnabled, isFalse);
   });
 
   test('logRequestHeaders should be false by default', () {
-    expect(leanRequesterBase.logRequestHeaders, isFalse);
+    expect(requesterConfiguration.logRequestHeaders, isFalse);
   });
 
   test('logResponseHeaders should be false by default', () {
-    expect(leanRequesterBase.logResponseHeaders, isFalse);
+    expect(requesterConfiguration.logResponseHeaders, isFalse);
   });
 
   test('logRequestTimeout should be false by default', () {
-    expect(leanRequesterBase.logRequestTimeout, isFalse);
+    expect(requesterConfiguration.logRequestTimeout, isFalse);
   });
 }

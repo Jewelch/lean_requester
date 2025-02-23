@@ -13,7 +13,7 @@ import '../../transformer/definitons/response_transformation_strategy.dart';
 import '../../transformer/transformer.dart';
 import '../requester_configuration.dart';
 
-mixin RequesterMixin on RequesterConfiguration {
+mixin RestfulrMixin on RequesterConfiguration {
   Future<R> request<R, M extends DAO>({
     TransformerRequirements<M>? requirements,
     M? requirement,

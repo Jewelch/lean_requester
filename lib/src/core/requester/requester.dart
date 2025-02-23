@@ -4,7 +4,7 @@ import 'requester_configuration.dart';
 
 export '../transformer/definitons/authentication_strategy.dart';
 
-class LeanRequester extends RequesterConfiguration with RequesterMixin, DownloadMixin {
+class LeanRequester extends RequesterConfiguration with RestfulrMixin, DownloadMixin {
   LeanRequester(
     super.dio,
     super.cacheManager,

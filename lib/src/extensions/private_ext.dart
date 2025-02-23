@@ -2,8 +2,8 @@ import 'package:awesome_dio_interceptor/awesome_dio_interceptor.dart' show Aweso
 import 'package:cg_core_defs/cache/cache_manager.dart';
 
 import '../../lean_requester.dart' show BaseOptions, ContentType, Dio, QueuedInterceptorsWrapper, DAO;
-import '../core/transformer/definitons/response_transformation_strategy.dart';
-import '../core/transformer/transformer.dart';
+import '../core/restful/transformer/definition/response_transformation_strategy.dart';
+import '../core/restful/transformer/transformer.dart';
 import 'shared_ext.dart';
 
 extension ListSecuredAdderExt<E> on List<E> {

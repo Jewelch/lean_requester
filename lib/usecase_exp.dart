@@ -1,5 +1,7 @@
 export 'dart:convert';
 
-export './src/core/requester/requester.dart';
-export './src/definitions/use_case_defs.dart';
+export './datasource_exp.dart' show FileOperationRequest, Equatable;
+export './lean_requester.dart' show UseCaseResult, Left, Right;
+export './src/core/requester.dart';
+export './src/core/restful/definition/use_case_defs.dart';
 export './src/errors/index.dart';

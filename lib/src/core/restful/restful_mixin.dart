@@ -3,17 +3,17 @@ import 'dart:math' show Random, min;
 import 'package:cg_core_defs/helpers/debugging_printer.dart';
 import 'package:dio/dio.dart' show CancelToken, DioException, Options, ProgressCallback, DioMixin;
 
-import '../../../../datasource_exp.dart' show ContentType;
-import '../../../../models_exp.dart' show DAO;
-import '../../../definitions/restful_methods.dart';
-import '../../../errors/index.dart' show CommonException, ServerException;
-import '../../../extensions/private_ext.dart';
-import '../../../extensions/shared_ext.dart';
-import '../../transformer/definitons/response_transformation_strategy.dart';
-import '../../transformer/transformer.dart';
-import '../requester_configuration.dart';
+import '../../../datasource_exp.dart' show ContentType;
+import '../../../models_exp.dart' show DAO;
+import '../../errors/index.dart' show CommonException, ServerException;
+import '../../extensions/private_ext.dart';
+import '../../extensions/shared_ext.dart';
+import '../config/requester_configuration.dart';
+import 'enum/restful_methods.dart';
+import 'transformer/definition/response_transformation_strategy.dart';
+import 'transformer/transformer.dart';
 
-mixin RestfulrMixin on RequesterConfiguration {
+mixin RestfulMixin on RequesterConfiguration {
   Future<R> request<R, M extends DAO>({
     TransformerRequirements<M>? requirements,
     M? requirement,

@@ -1,7 +1,7 @@
 import 'package:cg_core_defs/cache/cache_manager.dart';
 import 'package:cg_core_defs/connectivity/connectivity_monitor.dart';
 import 'package:dio/dio.dart';
-import 'package:lean_requester/src/core/requester/requester.dart';
+import 'package:lean_requester/src/core/requester.dart';
 
 import '../../tools/exports.dart';
 

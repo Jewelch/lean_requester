@@ -1,4 +1,4 @@
-import '../core/transformer/definitons/response_transformation_strategy.dart';
+import '../core/restful/transformer/definition/response_transformation_strategy.dart';
 import 'common_exception.dart';
 
 final class DataDecodingException<M> extends CommonException {

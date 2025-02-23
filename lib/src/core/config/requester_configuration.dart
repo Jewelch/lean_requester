@@ -2,7 +2,7 @@ import 'package:cg_core_defs/cg_core_defs.dart' show CacheManager, ConnectivityM
 
 import '../../../lean_requester.dart' show BaseOptions, ContentType, Dio, QueuedInterceptorsWrapper;
 import '../../extensions/shared_ext.dart';
-import '../transformer/definitons/authentication_strategy.dart';
+import '../restful/transformer/definition/authentication_strategy.dart';
 
 class RequesterConfiguration {
   RequesterConfiguration(

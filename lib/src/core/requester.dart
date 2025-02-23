@@ -1,10 +1,10 @@
-import 'mixins/download_mixin.dart';
-import 'mixins/restful_mixin.dart';
-import 'requester_configuration.dart';
+import 'config/requester_configuration.dart';
 
-export '../transformer/definitons/authentication_strategy.dart';
+export 'file_transfer/index.dart' show DownloadMixin, UploadMixin;
+export 'restful/restful_mixin.dart' show RestfulMixin;
+export 'restful/transformer/definition/authentication_strategy.dart';
 
-class LeanRequester extends RequesterConfiguration with RestfulrMixin, DownloadMixin {
+class LeanRequester extends RequesterConfiguration {
   LeanRequester(
     super.dio,
     super.cacheManager,

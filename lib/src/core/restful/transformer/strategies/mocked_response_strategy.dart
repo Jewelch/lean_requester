@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart' show ResponseBody;
 
-import '../../../models/data_objects.dart';
-import '../../../models/no_data_model.dart';
-import '../definitons/response_transformation_strategy.dart';
+import '../../../../models/data_objects.dart';
+import '../../../../models/no_data_model.dart';
+import '../definition/response_transformation_strategy.dart';
 
 class MockedResponseTransformationStrategy<R, M extends DAO> extends ResponseTransformationStrategy<R, M> {
   final dynamic mockingData;

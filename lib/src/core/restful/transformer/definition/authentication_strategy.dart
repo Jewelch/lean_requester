@@ -1,4 +1,4 @@
-import '../../../extensions/shared_ext.dart';
+import '../../../../extensions/shared_ext.dart';
 
 abstract class AuthenticationStrategy {
   Future<StringKeyedMap> getAuthorizationHeader();

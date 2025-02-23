@@ -4,9 +4,9 @@ import 'package:cg_core_defs/cache/cache_manager.dart';
 import 'package:dio/dio.dart' show ResponseBody;
 import 'package:flutter/foundation.dart' show compute;
 
-import '../../../errors/index.dart' show NonExistingCacheDataException;
-import '../../../models/data_objects.dart';
-import '../definitons/response_transformation_strategy.dart';
+import '../../../../errors/index.dart' show NonExistingCacheDataException;
+import '../../../../models/data_objects.dart';
+import '../definition/response_transformation_strategy.dart';
 
 class CachedResponseTransformationStrategy<R, M extends DAO> extends ResponseTransformationStrategy<R, M> {
   final CacheManager cacheManager;

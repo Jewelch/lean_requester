@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:cg_core_defs/cache/cache_manager.dart';
 
-import '../../exports.dart';
-import '../transformer/definitons/response_transformation_strategy.dart';
-import '../transformer/definitons/strategy_based_transformer.dart';
-import '../transformer/startegies/cached_response_strategy.dart';
-import '../transformer/startegies/mocked_response_strategy.dart';
-import '../transformer/startegies/network_response_strategy.dart';
+import '../../../exports.dart';
+import 'definition/response_transformation_strategy.dart';
+import 'definition/strategy_based_transformer.dart';
+import 'strategies/cached_response_strategy.dart';
+import 'strategies/mocked_response_strategy.dart';
+import 'strategies/network_response_strategy.dart';
 
 final class LeanTransformer<R, M extends DAO> extends StrategyBasedTransformer<R> {
   final TransformerRequirements<M> requirements;

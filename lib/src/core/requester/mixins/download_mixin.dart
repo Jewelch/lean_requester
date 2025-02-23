@@ -49,11 +49,13 @@ mixin DownloadMixin on RequesterConfiguration {
       fileAccessMode: configuration.fileAccessMode,
       data: configuration.data,
       options: configuration.options,
-      onReceiveProgress: (received, total) => configuration.onReceiveProgress?.call((
-        received: received,
-        total: total,
-        progress: (received / total * 100),
-      )),
+      onReceiveProgress: (received, total) => configuration.onReceiveProgress?.call(
+        DownloadProgress(
+          received: received,
+          total: total,
+          progress: (received / total * 100),
+        ),
+      ),
     );
 
     final file = File(configuration.savePath);

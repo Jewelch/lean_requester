@@ -42,9 +42,34 @@ class DownloadConfiguration {
   final bool debugIt;
 }
 
-typedef DownloadResult = Either<Failure, File>;
+class DownloadRequest {
+  final void Function(DownloadProgress)? onProgress;
+  final CancelToken? cancelToken;
 
-typedef DownloadProgress = ({int received, int total, double progress});
+  DownloadRequest({
+    this.onProgress,
+    this.cancelToken,
+  });
+}
+
+typedef DownloadResult = Either<Failure, File?>;
+
+class DownloadProgress {
+  final int received;
+  final int total;
+  final double progress;
+
+  const DownloadProgress({
+    required this.received,
+    required this.total,
+    required this.progress,
+  });
+
+  double get intPercentage => (received / total);
+  String get formattedPercentage => '${((received / total) * 100).toStringAsFixed(0)}%';
+  String get formattedSize => '${(total / 1024 / 1024).toStringAsFixed(1)} MB';
+  String get formattedProgress => '${(received / 1024 / 1024).toStringAsFixed(1)} MB / $formattedSize';
+}
 
 enum DownloadState {
   notStarted,

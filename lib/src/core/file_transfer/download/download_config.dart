@@ -5,7 +5,6 @@ import 'package:dio/dio.dart';
 import '../../restful/enum/restful_methods.dart';
 import '../common/config/operation_configuration.dart';
 import '../common/file_operation.dart';
-import '../common/models/operation_progress.dart';
 
 class DownloadConfiguration extends OperationConfiguration {
   DownloadConfiguration({
@@ -16,7 +15,7 @@ class DownloadConfiguration extends OperationConfiguration {
     super.headers,
     super.queryParameters,
     super.cancelToken,
-    this.onReceiveProgress,
+    super.onProgress,
     this.deleteOnError = true,
     this.fileAccessMode = FileAccessMode.write,
     this.lengthHeader = Headers.contentLengthHeader,
@@ -28,7 +27,6 @@ class DownloadConfiguration extends OperationConfiguration {
   }
 
   final dynamic savePath;
-  final void Function(OperationProgress)? onReceiveProgress;
   final bool deleteOnError;
   final FileAccessMode fileAccessMode;
   final String lengthHeader;

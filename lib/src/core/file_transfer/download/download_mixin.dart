@@ -39,13 +39,7 @@ mixin _DownloadMixin<C extends OperationConfiguration> on RequesterConfiguration
       fileAccessMode: configuration.fileAccessMode,
       data: configuration.data,
       options: configuration.options,
-      onReceiveProgress: (received, total) => configuration.onReceiveProgress?.call(
-        OperationProgress(
-          transferred: received,
-          total: total,
-          progress: (received / total * 100),
-        ),
-      ),
+      onReceiveProgress: configuration.onProgress,
     );
 
     final file = File(configuration.savePath);

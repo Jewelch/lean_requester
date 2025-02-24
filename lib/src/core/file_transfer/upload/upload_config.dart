@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import '../../restful/enum/restful_methods.dart';
 import '../common/config/operation_configuration.dart';
 import '../common/file_operation.dart';
-import '../common/models/operation_progress.dart';
 
 class UploadConfiguration extends OperationConfiguration {
   UploadConfiguration({
@@ -14,7 +13,7 @@ class UploadConfiguration extends OperationConfiguration {
     super.headers,
     super.queryParameters,
     super.cancelToken,
-    this.onUploadProgress,
+    super.onProgress,
     this.fileKey = 'file',
     this.extraData,
     super.options,
@@ -24,7 +23,6 @@ class UploadConfiguration extends OperationConfiguration {
   }
 
   final String filePath;
-  final void Function(OperationProgress)? onUploadProgress;
   final String fileKey;
   final Map<String, dynamic>? extraData;
 }

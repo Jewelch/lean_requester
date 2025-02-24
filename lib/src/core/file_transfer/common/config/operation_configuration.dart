@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart' show CancelToken, Options;
+import 'package:dio/dio.dart' show CancelToken, Options, ProgressCallback;
 
 import '../../../restful/enum/restful_methods.dart';
 
@@ -11,6 +11,7 @@ abstract class OperationConfiguration {
     this.queryParameters,
     this.cancelToken,
     this.options,
+    this.onProgress,
     this.debugIt = false,
   });
 
@@ -21,5 +22,6 @@ abstract class OperationConfiguration {
   final Map<String, dynamic>? queryParameters;
   final CancelToken? cancelToken;
   Options? options;
+  final ProgressCallback? onProgress;
   final bool debugIt;
 }

@@ -27,7 +27,7 @@ mixin _UploadMixin<C extends OperationConfiguration> on RequesterConfiguration i
   @override
   Future<FileOperationResult<File>> executeRequest(C configuration) async {
     if (configuration is! UploadConfiguration) {
-      throw ArgumentError('Configuration must be a DownloadConfiguration');
+      throw ArgumentError('Configuration must be an $UploadConfiguration');
     }
 
     final file = File(configuration.filePath);
@@ -43,13 +43,7 @@ mixin _UploadMixin<C extends OperationConfiguration> on RequesterConfiguration i
       queryParameters: configuration.queryParameters,
       cancelToken: configuration.cancelToken,
       options: configuration.options,
-      onSendProgress: (sent, total) => configuration.onUploadProgress?.call(
-        OperationProgress(
-          transferred: sent,
-          total: total,
-          progress: (sent / total * 100),
-        ),
-      ),
+      onSendProgress: configuration.onProgress,
     );
 
     return Right(response.data);

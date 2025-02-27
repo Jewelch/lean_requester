@@ -9,19 +9,20 @@ import '../config/operation_configuration.dart';
 part '../../download/file_downloader.dart';
 part '../../upload/filer_uploader.dart';
 
-typedef FileDownloader<C extends OperationConfiguration> = _FileDownloader<C>;
-typedef FileUploader<C extends OperationConfiguration, M extends DAO> = _FileUploader<C, M>;
-
 typedef FileOperationResult<T> = Either<Failure, T>;
 
-abstract class FileOperationExecutor<T, C extends OperationConfiguration> {
-  ContentType get _contentType;
-  String get _operationType;
-  Future<FileOperationResult<T>> _executeRequest(C configuration);
-
+abstract class _FileOperationExecutor<T, C extends OperationConfiguration> {
   final RequesterConfiguration requesterConfig;
+  final ContentType _contentType;
+  final String _operationType;
 
-  const FileOperationExecutor(this.requesterConfig);
+  const _FileOperationExecutor(
+    this.requesterConfig,
+    this._operationType,
+    this._contentType,
+  );
+
+  Future<FileOperationResult<T>> _executeRequest(C configuration);
 
   Future<FileOperationResult<T>> _executeFileOperation({required C configuration}) async {
     try {

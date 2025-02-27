@@ -1,7 +1,12 @@
 part of '../common/definition/file_operation.dart';
 
-class _FileDownloader<C extends OperationConfiguration> extends FileOperationExecutor<File, C> {
-  _FileDownloader(super.requesterConfig);
+class FileDownloader<C extends OperationConfiguration> extends _FileOperationExecutor<File, C> {
+  FileDownloader(RequesterConfiguration requesterConfig)
+      : super(
+          requesterConfig,
+          'download',
+          ContentType.binary,
+        );
 
   @override
   String get _operationType => 'download';
@@ -12,7 +17,7 @@ class _FileDownloader<C extends OperationConfiguration> extends FileOperationExe
   @override
   Future<FileOperationResult<File>> _executeRequest(C configuration) async {
     if (configuration is! DownloadConfiguration) {
-      throw ArgumentError('Configuration must be a DownloadConfiguration');
+      throw ArgumentError('Configuration must be a $DownloadConfiguration');
     }
 
     await requesterConfig.dio.download(

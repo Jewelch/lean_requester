@@ -1,7 +1,7 @@
 export 'dart:convert' show jsonEncode, jsonDecode;
 export 'dart:io' show ContentType;
 
-export './src/core/file_transfer/download/download_config.dart';
+export './src/core/file_transfer/download/config/download_config.dart';
 export './src/core/file_transfer/index.dart';
 export './src/core/requester.dart';
 export './src/core/restful/definition/datasource_defs.dart';

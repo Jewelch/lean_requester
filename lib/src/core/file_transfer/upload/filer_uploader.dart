@@ -1,26 +1,27 @@
 part of '../common/definition/file_operation.dart';
 
-class _FileUploader<C extends OperationConfiguration, M extends DAO> extends FileOperationExecutor<M, C> {
-  _FileUploader(super.requesterConfig);
+class FileUploader<C extends OperationConfiguration, M extends DAO> extends _FileOperationExecutor<M, C> {
+  FileUploader(RequesterConfiguration requesterConfig)
+      : super(
+          requesterConfig,
+          'upload',
+          ContentType("multipart", "form-data"),
+        );
 
-  @override
-  String get _operationType => 'upload';
-
-  @override
-  ContentType get _contentType => ContentType("multipart", "form-data");
-
-  Future<FormData> _prepareFormData(UploadConfiguration<M> configuration, File file) async {
-    final formData = FormData();
-
-    formData.files.add(
-      MapEntry(
-        configuration.fileKey,
-        await MultipartFile.fromFile(
-          configuration.filePath,
-          filename: file.path.split('/').last,
+  Future<FormData> _prepareFormData(
+    UploadConfiguration<M> configuration,
+    File file,
+  ) async {
+    final formData = FormData()
+      ..files.add(
+        MapEntry(
+          configuration.fileKey,
+          await MultipartFile.fromFile(
+            configuration.filePath,
+            filename: file.path.split('/').last,
+          ),
         ),
-      ),
-    );
+      );
 
     configuration.extraData?.forEach((key, value) => formData.fields.add(MapEntry(key, value.toString())));
 
@@ -30,7 +31,7 @@ class _FileUploader<C extends OperationConfiguration, M extends DAO> extends Fil
   @override
   Future<FileOperationResult<M>> _executeRequest(C configuration) async {
     if (configuration is! UploadConfiguration<M>) {
-      throw ArgumentError('Configuration must be an UploadConfiguration<$M>');
+      throw ArgumentError('Configuration must be an $UploadConfiguration<$M>');
     }
 
     final file = File(configuration.filePath);
@@ -38,11 +39,9 @@ class _FileUploader<C extends OperationConfiguration, M extends DAO> extends Fil
       return Left(Failure(message: 'File not found: ${configuration.filePath}'));
     }
 
-    final formData = await _prepareFormData(configuration, file);
-
     final response = await requesterConfig.dio.post(
       configuration.urlPath,
-      data: formData,
+      data: await _prepareFormData(configuration, file),
       queryParameters: configuration.queryParameters,
       cancelToken: configuration.cancelToken,
       options: configuration.options,

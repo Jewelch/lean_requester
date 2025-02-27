@@ -4,6 +4,9 @@ import 'package:flutter/foundation.dart' show compute;
 import '../../../../../models_exp.dart' show DaoList, DAO;
 import '../../../../errors/index.dart' show DataDecodingException, ListKeyException, UnsupportedDataTypeException;
 import '../../../../extensions/shared_ext.dart';
+import '../enum/transformer_strategies.dart';
+
+export '../enum/transformer_strategies.dart';
 
 abstract class ResponseTransformationStrategy<R, M extends DAO> with DataTransformationMixin<R, M> {
   final TransformerRequirements<M> requirements;
@@ -63,12 +66,6 @@ mixin DataTransformationMixin<R, M extends DAO> {
       }
     }
   }
-}
-
-enum TransformerStrategies {
-  cache,
-  mock,
-  network,
 }
 
 typedef TransformerRequirements<M extends DAO> = ({M dao, bool asList, String? listKey});

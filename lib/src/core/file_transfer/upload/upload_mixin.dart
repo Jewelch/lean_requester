@@ -1,6 +1,7 @@
 part of '../common/file_operation.dart';
 
-mixin _UploadMixin<C extends OperationConfiguration> on RequesterConfiguration implements FileOperation<File, C> {
+mixin _UploadMixin<C extends OperationConfiguration, M extends DAO> on RequesterConfiguration
+    implements FileOperation<M, C> {
   @override
   Future<void> prepareRequest(C configuration) async {
     await dio.setupOptions(
@@ -25,9 +26,9 @@ mixin _UploadMixin<C extends OperationConfiguration> on RequesterConfiguration i
   }
 
   @override
-  Future<FileOperationResult<File>> executeRequest(C configuration) async {
-    if (configuration is! UploadConfiguration) {
-      throw ArgumentError('Configuration must be an $UploadConfiguration');
+  Future<FileOperationResult<M>> executeRequest(C configuration) async {
+    if (configuration is! UploadConfiguration<M>) {
+      throw ArgumentError('Configuration must be an UploadConfiguration<$M>');
     }
 
     final file = File(configuration.filePath);
@@ -46,7 +47,7 @@ mixin _UploadMixin<C extends OperationConfiguration> on RequesterConfiguration i
       onSendProgress: configuration.onProgress,
     );
 
-    return Right(response.data);
+    return Right(configuration.responseModel.fromJson(response.data) as M);
   }
 
   @override
@@ -57,7 +58,7 @@ mixin _UploadMixin<C extends OperationConfiguration> on RequesterConfiguration i
     return Failure(message: '${error.runtimeType} -- Unexpected error during upload to $url');
   }
 
-  Future<FormData> _prepareFormData(UploadConfiguration configuration, File file) async {
+  Future<FormData> _prepareFormData(UploadConfiguration<M> configuration, File file) async {
     final formData = FormData();
 
     formData.files.add(

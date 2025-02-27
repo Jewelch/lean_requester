@@ -1,6 +1,6 @@
 enum FileOperationState {
   notStarted,
-  downloading,
+  processing,
   completed,
   failed,
 }

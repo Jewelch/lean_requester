@@ -2,6 +2,7 @@ import 'dart:io' show File, ContentType;
 
 import '../../../../datasource_exp.dart';
 import '../../../extensions/private_ext.dart';
+import '../../../models/data_objects.dart';
 import '../../../models/either.dart';
 import '../../config/requester_configuration.dart';
 import 'config/operation_configuration.dart';

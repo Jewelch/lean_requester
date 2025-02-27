@@ -13,7 +13,11 @@ import 'enum/restful_methods.dart';
 import 'transformer/definition/response_transformation_strategy.dart';
 import 'transformer/transformer.dart';
 
-mixin RestfulMixin on RequesterConfiguration {
+class RestfulConsumer {
+  final RequesterConfiguration requesterConfig;
+
+  RestfulConsumer(this.requesterConfig);
+
   Future<R> request<R, M extends DAO>({
     TransformerRequirements<M>? requirements,
     M? requirement,
@@ -38,41 +42,41 @@ mixin RestfulMixin on RequesterConfiguration {
       'Either requirement (DAO) or requirements (DAO, asList, listKey) must be provided',
     );
 
-    await dio.setupOptions(
-      baseOptions,
+    await requesterConfig.dio.setupOptions(
+      requesterConfig.baseOptions,
       baseUrl,
       contentType,
       headers: {
-        ...?(await authenticationStrategy?.getAuthorizationHeader()),
-        ...?commonHeaders,
+        ...?(await requesterConfig.authenticationStrategy?.getAuthorizationHeader()),
+        ...?requesterConfig.commonHeaders,
         ...?extraHeaders,
       },
     );
 
-    dio
+    requesterConfig.dio
       ..setupInterceptors(
-        queuedInterceptorsWrapper,
+        requesterConfig.queuedInterceptorsWrapper,
         debugIt,
-        debuggingEnabled,
-        logRequestHeaders,
-        logResponseHeaders,
-        logRequestTimeout,
+        requesterConfig.debuggingEnabled,
+        requesterConfig.logRequestHeaders,
+        requesterConfig.logResponseHeaders,
+        requesterConfig.logRequestTimeout,
       )
       ..setupTransformer<R, M>(
         requirements ?? (dao: requirement!, asList: false, listKey: null),
-        cacheManager,
+        requesterConfig.cacheManager,
         cachingKey ?? path,
         mockingData,
-        mockAwaitDurationMs,
+        requesterConfig.mockAwaitDurationMs,
       );
 
-    final transformer = dio.transformer as LeanTransformer<R, M>;
+    final transformer = requesterConfig.dio.transformer as LeanTransformer<R, M>;
 
-    if (!connectivityMonitor.isConnected) {
+    if (!requesterConfig.connectivityMonitor.isConnected) {
       return await transformer.transformCachedResponse();
     }
 
-    if (mockingModeEnabled || mockIt) {
+    if (requesterConfig.mockingModeEnabled || mockIt) {
       return await transformer.transformMockedResponse();
     }
 
@@ -98,11 +102,11 @@ mixin RestfulMixin on RequesterConfiguration {
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   }) async {
-    for (int attempt = 1; attempt <= maxRetriesPerRequest; attempt++) {
-      if (attempt > 1) Debugger.orange('Attempt $attempt for request to ${baseOptions.baseUrl + path}');
+    for (int attempt = 1; attempt <= requesterConfig.maxRetriesPerRequest; attempt++) {
+      if (attempt > 1) Debugger.orange('Attempt $attempt for request to ${requesterConfig.baseOptions.baseUrl + path}');
 
       try {
-        final response = await dio.request(
+        final response = await requesterConfig.dio.request(
           path,
           data: body,
           queryParameters: queryParameters,
@@ -120,20 +124,23 @@ mixin RestfulMixin on RequesterConfiguration {
         await _handleExceptions(attempt, path);
       }
     }
-    throw ServerException.unexpected(baseOptions.baseUrl + path, methodName: method.name);
+    throw ServerException.unexpected(requesterConfig.baseOptions.baseUrl + path, methodName: method.name);
   }
 
   Future<void> _handleExceptions(int attempt, String path) async {
-    if (attempt == maxRetriesPerRequest)
+    if (attempt == requesterConfig.maxRetriesPerRequest)
       throw ServerException.maxRetriesReached(
-        baseOptions.baseUrl + path,
-        maxRetriesPerRequest: maxRetriesPerRequest,
+        requesterConfig.baseOptions.baseUrl + path,
+        maxRetriesPerRequest: requesterConfig.maxRetriesPerRequest,
       );
 
     await Future.delayed(_calculateDelayFor(attempt));
   }
 
   Duration _calculateDelayFor(int attempt) => Duration(
-        milliseconds: min((1 << (attempt - 1)) * retryDelayMs + Random().nextInt(1000), maxRetryDelayMs),
+        milliseconds: min(
+          (1 << (attempt - 1)) * requesterConfig.retryDelayMs + Random().nextInt(1000),
+          requesterConfig.maxRetryDelayMs,
+        ),
       );
 }

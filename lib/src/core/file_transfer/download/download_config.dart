@@ -4,7 +4,7 @@ import 'package:dio/dio.dart';
 
 import '../../restful/enum/restful_methods.dart';
 import '../common/config/operation_configuration.dart';
-import '../common/file_operation.dart';
+import '../common/definition/file_operation.dart';
 
 class DownloadConfiguration extends OperationConfiguration {
   DownloadConfiguration({

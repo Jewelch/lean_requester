@@ -12,7 +12,7 @@ class FileOperationRequest {
 
 extension FileOperationRequestX on (int, int) {
   double get percentage => ($1 / $2);
-  String get formattedPercentage => '${(($1 / $2) * 100).toStringAsFixed(0)}%';
+  String get formattedPercentage => '${(percentage * 100).toStringAsFixed(0)}%';
   String get formattedSize => '${($2 / 1024 / 1024).toStringAsFixed(1)} MB';
   String get formattedProgress => '${($1 / 1024 / 1024).toStringAsFixed(1)} MB / $formattedSize';
 }

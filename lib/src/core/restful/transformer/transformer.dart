@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:cg_core_defs/cache/cache_manager.dart';
+import 'package:dio/dio.dart' show RequestOptions, ResponseBody;
 
-import '../../../exports.dart';
+import '../../../models/data_objects.dart';
 import 'definition/response_transformation_strategy.dart';
 import 'definition/strategy_based_transformer.dart';
 import 'strategies/cached_response_strategy.dart';

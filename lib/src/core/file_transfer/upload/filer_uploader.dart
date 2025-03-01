@@ -39,7 +39,7 @@ class FileUploader<C extends OperationConfiguration, M extends DAO> extends _Fil
       return Left(Failure(message: 'File not found: ${configuration.filePath}'));
     }
 
-    final response = await requesterConfig.dio.post(
+    final response = await _requesterConfig.dio.post(
       configuration.urlPath,
       data: await _prepareFormData(configuration, file),
       queryParameters: configuration.queryParameters,

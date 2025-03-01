@@ -12,12 +12,12 @@ part '../../upload/filer_uploader.dart';
 typedef FileOperationResult<T> = Either<Failure, T>;
 
 abstract class _FileOperationExecutor<T, C extends OperationConfiguration> {
-  final RequesterConfiguration requesterConfig;
+  final RequesterConfiguration _requesterConfig;
   final ContentType _contentType;
   final String _operationType;
 
   const _FileOperationExecutor(
-    this.requesterConfig,
+    this._requesterConfig,
     this._operationType,
     this._contentType,
   );
@@ -34,24 +34,24 @@ abstract class _FileOperationExecutor<T, C extends OperationConfiguration> {
   }
 
   Future<void> _prepareRequest(C configuration) async {
-    await requesterConfig.dio.setupOptions(
-      requesterConfig.baseOptions,
+    await _requesterConfig.dio.setupOptions(
+      _requesterConfig.baseOptions,
       configuration.baseUrl,
       _contentType,
       headers: {
-        ...?(await requesterConfig.authenticationStrategy?.getAuthorizationHeader()),
-        ...?requesterConfig.commonHeaders,
+        ...?(await _requesterConfig.authenticationStrategy?.getAuthorizationHeader()),
+        ...?_requesterConfig.commonHeaders,
         ...?configuration.headers,
       },
     );
 
-    requesterConfig.dio.setupInterceptors(
-      requesterConfig.queuedInterceptorsWrapper,
+    _requesterConfig.dio.setupInterceptors(
+      _requesterConfig.queuedInterceptorsWrapper,
       configuration.debugIt,
-      requesterConfig.debuggingEnabled,
-      requesterConfig.logRequestHeaders,
-      requesterConfig.logResponseHeaders,
-      requesterConfig.logRequestTimeout,
+      _requesterConfig.debuggingEnabled,
+      _requesterConfig.logRequestHeaders,
+      _requesterConfig.logResponseHeaders,
+      _requesterConfig.logRequestTimeout,
     );
   }
 

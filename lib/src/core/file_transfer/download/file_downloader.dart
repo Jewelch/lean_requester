@@ -20,7 +20,7 @@ class FileDownloader<C extends OperationConfiguration> extends _FileOperationExe
       throw ArgumentError('Configuration must be a $DownloadConfiguration');
     }
 
-    await requesterConfig.dio.download(
+    await _requesterConfig.dio.download(
       configuration.urlPath,
       configuration.savePath,
       cancelToken: configuration.cancelToken,

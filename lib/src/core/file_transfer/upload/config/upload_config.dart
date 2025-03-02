@@ -1,7 +1,6 @@
 import '../../../../models/data_objects.dart';
 import '../../../restful/enum/restful_methods.dart';
 import '../../common/config/operation_configuration.dart';
-import '../../common/definition/file_operation.dart';
 
 class UploadConfiguration<M extends DAO> extends OperationConfiguration {
   UploadConfiguration({
@@ -26,4 +25,4 @@ class UploadConfiguration<M extends DAO> extends OperationConfiguration {
   final M responseModel;
 }
 
-typedef UploadResult = FileOperationResult<Object>;
+typedef UploadResult<M extends DAO> = FileOperationResult<M>;

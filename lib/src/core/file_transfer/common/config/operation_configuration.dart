@@ -1,6 +1,5 @@
-import 'package:dio/dio.dart' show CancelToken, Options, ProgressCallback;
-
-import '../../../restful/enum/restful_methods.dart';
+import '../../../../../datasource_exp.dart' show RestfulMethods, Failure, CancelToken, Options, ProgressCallback;
+import '../../../../models/either.dart';
 
 abstract class OperationConfiguration {
   OperationConfiguration({
@@ -25,3 +24,5 @@ abstract class OperationConfiguration {
   final ProgressCallback? onProgress;
   final bool debugIt;
 }
+
+typedef FileOperationResult<T> = Either<Failure, T>;

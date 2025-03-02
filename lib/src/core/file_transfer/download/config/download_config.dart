@@ -1,10 +1,9 @@
-import 'dart:io';
+import 'dart:io' show File;
 
 import 'package:dio/dio.dart';
 
 import '../../../restful/enum/restful_methods.dart';
 import '../../common/config/operation_configuration.dart';
-import '../../common/definition/file_operation.dart';
 
 class DownloadConfiguration extends OperationConfiguration {
   DownloadConfiguration({
@@ -33,4 +32,4 @@ class DownloadConfiguration extends OperationConfiguration {
   final Object? data;
 }
 
-typedef DownloadResult = FileOperationResult<File?>;
+typedef DownloadResult = FileOperationResult<File>;

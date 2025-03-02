@@ -40,6 +40,5 @@ class FileDownloader<C extends OperationConfiguration> extends _FileOperationExe
         : Left(Failure(message: 'File not found after download: ${configuration.savePath}'));
   }
 
-  Future<FileOperationResult<File>> download(C configuration) async =>
-      await _executeFileOperation(configuration: configuration);
+  Future<DownloadResult> download(C configuration) async => await _executeFileOperation(configuration: configuration);
 }

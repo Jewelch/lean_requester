@@ -9,8 +9,6 @@ import '../config/operation_configuration.dart';
 part '../../download/file_downloader.dart';
 part '../../upload/filer_uploader.dart';
 
-typedef FileOperationResult<T> = Either<Failure, T>;
-
 abstract class _FileOperationExecutor<T, C extends OperationConfiguration> {
   final RequesterConfiguration _requesterConfig;
   final ContentType _contentType;

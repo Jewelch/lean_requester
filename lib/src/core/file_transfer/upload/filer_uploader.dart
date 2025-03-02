@@ -29,7 +29,7 @@ class FileUploader<C extends OperationConfiguration, M extends DAO> extends _Fil
   }
 
   @override
-  Future<FileOperationResult<M>> _executeRequest(C configuration) async {
+  Future<UploadResult<M>> _executeRequest(C configuration) async {
     if (configuration is! UploadConfiguration<M>) {
       throw ArgumentError('Configuration must be an $UploadConfiguration<$M>');
     }
@@ -51,6 +51,5 @@ class FileUploader<C extends OperationConfiguration, M extends DAO> extends _Fil
     return Right(configuration.responseModel.fromJson(response.data) as M);
   }
 
-  Future<FileOperationResult<M>> upload(C configuration) async =>
-      await _executeFileOperation(configuration: configuration);
+  Future<UploadResult<M>> upload(C configuration) async => (await _executeFileOperation(configuration: configuration));
 }

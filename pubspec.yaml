@@ -17,7 +17,7 @@ dependencies:
   cg_core_defs:
     git:
       url: https://github.com/Jewelch/cg_core_defs
-      ref: v1.0
+      ref: v1.1
 
   dio: ^5.8.0+1
   awesome_dio_interceptor: ^1.3.0

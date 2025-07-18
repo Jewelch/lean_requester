@@ -15,11 +15,13 @@ dependencies:
     sdk: flutter
 
   cg_core_defs:
-    path: ../cg_core_defs
+    git:
+      url: https://github.com/Jewelch/cg_core_defs
+      ref: main
 
   dio: ^5.8.0+1
-  awesome_dio_interceptor:
-  shared_preferences: ^2.5.1 
+  awesome_dio_interceptor: ^1.3.0
+  shared_preferences: ^2.5.3
 
 dev_dependencies:
   flutter_test:

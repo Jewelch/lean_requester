@@ -1,5 +1,5 @@
-import 'package:cg_core_defs/cache/cache_manager.dart';
-import 'package:cg_core_defs/connectivity/connectivity_monitor.dart';
+import 'package:cg_core_defs/strategies/cache/cache_manager.dart';
+import 'package:cg_core_defs/strategies/connectivity/connectivity_monitor.dart';
 import 'package:dio/dio.dart';
 
 import '../../tools/exports.dart';

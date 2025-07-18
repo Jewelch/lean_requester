@@ -1,6 +1,6 @@
 import 'dart:convert' show jsonEncode;
 
-import 'package:cg_core_defs/cache/cache_manager.dart';
+import 'package:cg_core_defs/strategies/cache/cache_manager.dart';
 import 'package:dio/dio.dart' show ResponseBody;
 import 'package:flutter/foundation.dart' show compute;
 
@@ -8,7 +8,8 @@ import '../../../../../models_exp.dart' show DAO, DaoList, NoDataModel;
 import '../../../../errors/index.dart' show ResponseBodyException;
 import '../definition/response_transformation_strategy.dart';
 
-class NetworkResponseTransformationStrategy<R, M extends DAO> extends ResponseTransformationStrategy<R, M> {
+class NetworkResponseTransformationStrategy<R, M extends DAO>
+    extends ResponseTransformationStrategy<R, M> {
   final CacheManager cacheManager;
   final String cachingKey;
 
@@ -26,7 +27,8 @@ class NetworkResponseTransformationStrategy<R, M extends DAO> extends ResponseTr
     validateResponse(responseBody);
 
     if (requirements.dao is NoDataModel) {
-      return requirements.dao.fromJson(responseBody!.statusCode >= 200 && responseBody.statusCode < 300);
+      return requirements.dao
+          .fromJson(responseBody!.statusCode >= 200 && responseBody.statusCode < 300);
     }
 
     final R decodedData = await decodeDataBasedOnStrategy(

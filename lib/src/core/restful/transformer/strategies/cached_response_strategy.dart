@@ -1,6 +1,6 @@
 import 'dart:convert' show jsonDecode;
 
-import 'package:cg_core_defs/cache/cache_manager.dart';
+import 'package:cg_core_defs/strategies/cache/cache_manager.dart';
 import 'package:dio/dio.dart' show ResponseBody;
 import 'package:flutter/foundation.dart' show compute;
 
@@ -8,7 +8,8 @@ import '../../../../errors/index.dart' show NonExistingCacheDataException;
 import '../../../../models/data_objects.dart';
 import '../definition/response_transformation_strategy.dart';
 
-class CachedResponseTransformationStrategy<R, M extends DAO> extends ResponseTransformationStrategy<R, M> {
+class CachedResponseTransformationStrategy<R, M extends DAO>
+    extends ResponseTransformationStrategy<R, M> {
   final CacheManager cacheManager;
   final String cachingKey;
 

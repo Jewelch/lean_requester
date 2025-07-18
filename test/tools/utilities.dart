@@ -42,6 +42,6 @@ Widget getWidgetByType<T extends Widget>() {
   return find.byType(T).evaluate().first.widget;
 }
 
-T getWidgetByTypeAndKey<T extends Widget>({required final key}) {
+T getWidgetByTypeAndKey<T extends Widget>({required final dynamic key}) {
   return find.byKey(Key(key)).evaluate().first.widget as T;
 }
